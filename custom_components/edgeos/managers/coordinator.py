@@ -370,6 +370,21 @@ class Coordinator(DataUpdateCoordinator):
             EntityKeys.UPDATE_ENTITIES_INTERVAL: self._get_update_entities_interval_data,
             EntityKeys.UPDATE_API_INTERVAL: self._get_update_api_interval_data,
             EntityKeys.UNIT: self._get_unit_data,
+            EntityKeys.SMART_QUEUE_TOTAL: self._get_smart_queue_total_data,
+            EntityKeys.SMART_QUEUE_ENABLED: self._get_smart_queue_enabled_data,
+            EntityKeys.SMART_QUEUE_INTERFACES: self._get_smart_queue_interfaces_data,
+            EntityKeys.SMART_QUEUE_UPLOAD_LIMIT: self._get_smart_queue_upload_limit_data,
+            EntityKeys.SMART_QUEUE_DOWNLOAD_LIMIT: self._get_smart_queue_download_limit_data,
+            EntityKeys.SMART_QUEUE_RX_RATE: self._get_smart_queue_rx_rate_data,
+            EntityKeys.SMART_QUEUE_TX_RATE: self._get_smart_queue_tx_rate_data,
+            EntityKeys.SMART_QUEUE_RX_TRAFFIC: self._get_smart_queue_rx_traffic_data,
+            EntityKeys.SMART_QUEUE_TX_TRAFFIC: self._get_smart_queue_tx_traffic_data,
+            EntityKeys.SMART_QUEUE_RX_DROPPED: self._get_smart_queue_rx_dropped_data,
+            EntityKeys.SMART_QUEUE_TX_DROPPED: self._get_smart_queue_tx_dropped_data,
+            EntityKeys.SMART_QUEUE_RX_ERRORS: self._get_smart_queue_rx_errors_data,
+            EntityKeys.SMART_QUEUE_TX_ERRORS: self._get_smart_queue_tx_errors_data,
+            EntityKeys.SMART_QUEUE_RX_PACKETS: self._get_smart_queue_rx_packets_data,
+            EntityKeys.SMART_QUEUE_TX_PACKETS: self._get_smart_queue_tx_packets_data,
             EntityKeys.INTERFACE_CONNECTED: self._get_interface_connected_data,
             EntityKeys.INTERFACE_RECEIVED_DROPPED: self._get_interface_received_dropped_data,
             EntityKeys.INTERFACE_SENT_DROPPED: self._get_interface_sent_dropped_data,
@@ -582,6 +597,111 @@ class Coordinator(DataUpdateCoordinator):
                 ACTION_ENTITY_SELECT_OPTION: self._set_unit,
             },
         }
+
+        return result
+
+    def _get_smart_queue_total_data(self, _entity_description) -> dict | None:
+        data = self._system_processor.get()
+
+        result = {ATTR_STATE: data.smart_queue_total}
+
+        return result
+
+    def _get_smart_queue_enabled_data(self, _entity_description) -> dict | None:
+        data = self._system_processor.get()
+
+        result = {ATTR_STATE: data.smart_queue_enabled}
+
+        return result
+
+    def _get_smart_queue_interfaces_data(self, _entity_description) -> dict | None:
+        data = self._system_processor.get()
+
+        result = {ATTR_STATE: data.smart_queue_interfaces}
+
+        return result
+
+    def _get_smart_queue_upload_limit_data(self, _entity_description) -> dict | None:
+        data = self._system_processor.get()
+
+        result = {ATTR_STATE: data.smart_queue_upload_limit}
+
+        return result
+
+    def _get_smart_queue_download_limit_data(self, _entity_description) -> dict | None:
+        data = self._system_processor.get()
+
+        result = {ATTR_STATE: data.smart_queue_download_limit}
+
+        return result
+
+    def _get_smart_queue_rx_rate_data(self, _entity_description) -> dict | None:
+        data = self._system_processor.get()
+
+        result = {ATTR_STATE: data.smart_queue_rx_rate}
+
+        return result
+
+    def _get_smart_queue_tx_rate_data(self, _entity_description) -> dict | None:
+        data = self._system_processor.get()
+
+        result = {ATTR_STATE: data.smart_queue_tx_rate}
+
+        return result
+
+    def _get_smart_queue_rx_traffic_data(self, _entity_description) -> dict | None:
+        data = self._system_processor.get()
+
+        result = {ATTR_STATE: data.smart_queue_rx_traffic}
+
+        return result
+
+    def _get_smart_queue_tx_traffic_data(self, _entity_description) -> dict | None:
+        data = self._system_processor.get()
+
+        result = {ATTR_STATE: data.smart_queue_tx_traffic}
+
+        return result
+
+    def _get_smart_queue_rx_dropped_data(self, _entity_description) -> dict | None:
+        data = self._system_processor.get()
+
+        result = {ATTR_STATE: data.smart_queue_rx_dropped}
+
+        return result
+
+    def _get_smart_queue_tx_dropped_data(self, _entity_description) -> dict | None:
+        data = self._system_processor.get()
+
+        result = {ATTR_STATE: data.smart_queue_tx_dropped}
+
+        return result
+
+    def _get_smart_queue_rx_errors_data(self, _entity_description) -> dict | None:
+        data = self._system_processor.get()
+
+        result = {ATTR_STATE: data.smart_queue_rx_errors}
+
+        return result
+
+    def _get_smart_queue_tx_errors_data(self, _entity_description) -> dict | None:
+        data = self._system_processor.get()
+
+        result = {ATTR_STATE: data.smart_queue_tx_errors}
+
+        return result
+
+    def _get_smart_queue_rx_packets_data(self, _entity_description) -> dict | None:
+        data = self._system_processor.get()
+
+        result = {ATTR_STATE: data.smart_queue_rx_packets}
+
+        return result
+
+    def _get_smart_queue_tx_packets_data(self, _entity_description) -> dict | None:
+        data = self._system_processor.get()
+
+        result = {ATTR_STATE: data.smart_queue_tx_packets}
 
         return result
 

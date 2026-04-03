@@ -38,6 +38,21 @@ class EdgeOSSystemData:
     mem: int | None
     last_reset: datetime | None
     user_level: str | None
+    smart_queue_total: int
+    smart_queue_enabled: int
+    smart_queue_interfaces: int
+    smart_queue_upload_limit: float
+    smart_queue_download_limit: float
+    smart_queue_rx_rate: float
+    smart_queue_tx_rate: float
+    smart_queue_rx_traffic: float
+    smart_queue_tx_traffic: float
+    smart_queue_rx_dropped: float
+    smart_queue_tx_dropped: float
+    smart_queue_rx_errors: float
+    smart_queue_tx_errors: float
+    smart_queue_rx_packets: float
+    smart_queue_tx_packets: float
 
     def __init__(self):
         self.hostname = None
@@ -59,6 +74,21 @@ class EdgeOSSystemData:
         self.upgrade_url = None
         self.upgrade_version = None
         self.user_level = None
+        self.smart_queue_total = 0
+        self.smart_queue_enabled = 0
+        self.smart_queue_interfaces = 0
+        self.smart_queue_upload_limit = 0
+        self.smart_queue_download_limit = 0
+        self.smart_queue_rx_rate = 0
+        self.smart_queue_tx_rate = 0
+        self.smart_queue_rx_traffic = 0
+        self.smart_queue_tx_traffic = 0
+        self.smart_queue_rx_dropped = 0
+        self.smart_queue_tx_dropped = 0
+        self.smart_queue_rx_errors = 0
+        self.smart_queue_tx_errors = 0
+        self.smart_queue_rx_packets = 0
+        self.smart_queue_tx_packets = 0
 
     @property
     def is_admin(self) -> bool:
@@ -83,6 +113,21 @@ class EdgeOSSystemData:
             SYSTEM_DATA_TRAFFIC_ANALYSIS_EXPORT: self.traffic_analysis_export,
             DHCP_SERVER_LEASES: self.leased_devices,
             SYSTEM_DATA_LOGIN_USER_LEVEL: self.user_level,
+            "smart_queue_total": self.smart_queue_total,
+            "smart_queue_enabled": self.smart_queue_enabled,
+            "smart_queue_interfaces": self.smart_queue_interfaces,
+            "smart_queue_upload_limit": self.smart_queue_upload_limit,
+            "smart_queue_download_limit": self.smart_queue_download_limit,
+            "smart_queue_rx_rate": self.smart_queue_rx_rate,
+            "smart_queue_tx_rate": self.smart_queue_tx_rate,
+            "smart_queue_rx_traffic": self.smart_queue_rx_traffic,
+            "smart_queue_tx_traffic": self.smart_queue_tx_traffic,
+            "smart_queue_rx_dropped": self.smart_queue_rx_dropped,
+            "smart_queue_tx_dropped": self.smart_queue_tx_dropped,
+            "smart_queue_rx_errors": self.smart_queue_rx_errors,
+            "smart_queue_tx_errors": self.smart_queue_tx_errors,
+            "smart_queue_rx_packets": self.smart_queue_rx_packets,
+            "smart_queue_tx_packets": self.smart_queue_tx_packets,
         }
 
         return obj

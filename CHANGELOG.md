@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Fork sync: incorporated parent repository [PR #171](https://github.com/elad-bar/ha-edgeos/pull/171)
+- Add Smart Queue parameter and statistics sensors
 
 ## 2.1.9
 
