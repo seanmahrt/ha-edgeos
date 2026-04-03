@@ -14,6 +14,11 @@ Provides an integration between EdgeOS (Ubiquiti) routers to Home Assistant.
 
 [Changelog](https://github.com/elad-bar/ha-edgeos/blob/master/CHANGELOG.md)
 
+## Fork Sync Notes
+
+This fork currently incorporates parent repository PR #171:
+https://github.com/elad-bar/ha-edgeos/pull/171
+
 ## How to
 
 #### Requirements
