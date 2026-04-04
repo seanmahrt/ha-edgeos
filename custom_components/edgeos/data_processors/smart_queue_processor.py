@@ -81,6 +81,40 @@ def to_bps(value) -> float:
     return (amount * multiplier) / 8.0
 
 
+def extract_rate_unit(value) -> str | None:
+    if value is None:
+        return None
+
+    if isinstance(value, (int, float)):
+        return None
+
+    value_str = str(value).strip().lower()
+    match = re.match(r"^([0-9]+(?:\.[0-9]+)?)\s*([a-zA-Z]+)?$", value_str)
+
+    if match is None:
+        return None
+
+    unit = match.group(2)
+    if unit in [None, ""]:
+        return None
+
+    unit_aliases = {
+        "bps": "bps",
+        "k": "kbit",
+        "kbps": "kbit",
+        "kbit": "kbit",
+        "kbits": "kbit",
+        "m": "mbit",
+        "mbps": "mbit",
+        "mbit": "mbit",
+        "g": "gbit",
+        "gbps": "gbit",
+        "gbit": "gbit",
+    }
+
+    return unit_aliases.get(unit, unit)
+
+
 def get_first_value(data: dict, keys: list[str]):
     for key in keys:
         if key in data:
@@ -211,6 +245,22 @@ def _get_queue_rate(queue_data: dict, keys: list[str], nested_key: str) -> float
     return 0.0
 
 
+def _get_queue_rate_unit(queue_data: dict, keys: list[str], nested_key: str) -> str | None:
+    direct_value = get_first_value(queue_data, keys)
+
+    if direct_value is not None and not isinstance(direct_value, dict):
+        return extract_rate_unit(direct_value)
+
+    nested_section = queue_data.get(nested_key)
+    if isinstance(nested_section, dict):
+        nested_rate = get_first_value(nested_section, ["rate", *keys])
+
+        if nested_rate is not None and not isinstance(nested_rate, dict):
+            return extract_rate_unit(nested_rate)
+
+    return None
+
+
 def aggregate_smart_queue_parameters(system_section: dict) -> dict:
     queue_items = extract_smart_queue_entries(system_section)
 
@@ -279,6 +329,14 @@ def aggregate_smart_queue_parameters(system_section: dict) -> dict:
         policy_map[f"{interface_name}:{queue_name}"] = {
             "policy_name": str(queue_name),
             "wan_interface": str(interface_name),
+            "upload_unit": _get_queue_rate_unit(
+                queue_data, SMART_QUEUE_RATE_KEYS, "upload"
+            )
+            or "",
+            "download_unit": _get_queue_rate_unit(
+                queue_data, SMART_QUEUE_DOWNLOAD_KEYS, "download"
+            )
+            or "",
         }
 
     return {

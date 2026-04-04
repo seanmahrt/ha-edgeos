@@ -589,13 +589,46 @@ class RestAPI:
             )
 
     @staticmethod
-    def _format_mbit_rate(value_bytes_per_second: float) -> str:
-        value_mbit = max(float(value_bytes_per_second), 0.0) * 8.0 / 1_000_000.0
+    def _normalize_rate_unit(unit: str | None) -> str:
+        normalized = str(unit or "").strip().lower()
 
-        if abs(value_mbit - round(value_mbit)) < 0.000001:
-            return str(int(round(value_mbit)))
+        aliases = {
+            "": "mbit",
+            "bps": "bps",
+            "k": "kbit",
+            "kbps": "kbit",
+            "kbit": "kbit",
+            "kbits": "kbit",
+            "m": "mbit",
+            "mbps": "mbit",
+            "mbit": "mbit",
+            "g": "gbit",
+            "gbps": "gbit",
+            "gbit": "gbit",
+        }
 
-        return f"{value_mbit:.3f}".rstrip("0").rstrip(".")
+        return aliases.get(normalized, "mbit")
+
+    @classmethod
+    def _format_rate_in_unit(cls, value_bytes_per_second: float, unit: str | None) -> str:
+        unit_value = cls._normalize_rate_unit(unit)
+        value_bps = max(float(value_bytes_per_second), 0.0) * 8.0
+
+        if unit_value == "bps":
+            amount = value_bps
+        elif unit_value == "kbit":
+            amount = value_bps / 1_000.0
+        elif unit_value == "gbit":
+            amount = value_bps / 1_000_000_000.0
+        else:
+            amount = value_bps / 1_000_000.0
+
+        if abs(amount - round(amount)) < 0.000001:
+            amount_text = str(int(round(amount)))
+        else:
+            amount_text = f"{amount:.3f}".rstrip("0").rstrip(".")
+
+        return f"{amount_text}{unit_value}"
 
     async def set_smart_queue_rate(
         self,
@@ -613,8 +646,6 @@ class RestAPI:
             _LOGGER.warning("Cannot set smart queue rate: policy map is empty")
             return
 
-        rate_value = self._format_mbit_rate(value_bytes_per_second)
-
         data = {"traffic-control": {"smart-queue": {}}}
 
         for item in policy_map.values():
@@ -624,6 +655,10 @@ class RestAPI:
             policy_name = item.get("policy_name")
             if policy_name in [None, ""]:
                 continue
+
+            unit_key = f"{direction}_unit"
+            rate_unit = item.get(unit_key)
+            rate_value = self._format_rate_in_unit(value_bytes_per_second, rate_unit)
 
             data["traffic-control"]["smart-queue"].setdefault(policy_name, {})
             data["traffic-control"]["smart-queue"][policy_name].setdefault(
@@ -650,4 +685,6 @@ class RestAPI:
                 modified = success_key != RESPONSE_FAILURE_CODE
 
         if not modified:
-            _LOGGER.error(f"Failed to set smart queue {direction} rate to {rate_value}")
+            _LOGGER.error(
+                f"Failed to set smart queue {direction} rate to {value_bytes_per_second} bytes/sec"
+            )
