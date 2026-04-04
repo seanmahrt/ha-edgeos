@@ -351,7 +351,9 @@ def is_valid_entity(
 
 def get_platforms() -> list[str]:
     platforms = {
-        entity_description.platform: None for entity_description in ENTITY_DESCRIPTIONS
+        str(entity_description.platform.value): None
+        for entity_description in ENTITY_DESCRIPTIONS
+        if entity_description.platform is not None
     }
     result = list(platforms.keys())
 

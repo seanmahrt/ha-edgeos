@@ -182,6 +182,7 @@ class Coordinator(DataUpdateCoordinator):
         self._build_data_mapping()
 
         entry = self.config_manager.entry
+        _LOGGER.info("Forwarding EdgeOS platforms: %s", ", ".join(PLATFORMS))
         await self.hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
         _LOGGER.info(f"Start loading {DOMAIN} integration, Entry ID: {entry.entry_id}")

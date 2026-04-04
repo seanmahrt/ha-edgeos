@@ -24,6 +24,7 @@ _LOGGER = logging.getLogger(__name__)
 async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities
 ):
+    _LOGGER.info("Setting up EdgeOS number platform for entry %s", entry.entry_id)
     await async_setup_base_entry(
         hass,
         entry,
