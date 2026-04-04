@@ -48,6 +48,11 @@ def _async_get_diagnostics(
 
     debug_data = coordinator.get_debug_data()
 
+    integration_build = debug_data.get("integration_build")
+    integration_build_loaded_at_utc = debug_data.get(
+        "integration_build_loaded_at_utc"
+    )
+
     data = {
         "disabled_by": entry.disabled_by,
         "disabled_polling": entry.pref_disable_polling,
@@ -57,6 +62,12 @@ def _async_get_diagnostics(
         data["config"] = debug_data["config"]
         data["data"] = debug_data["data"]
         data["processors"] = debug_data["processors"]
+
+        if integration_build is not None:
+            data["integration_build"] = integration_build
+
+        if integration_build_loaded_at_utc is not None:
+            data["integration_build_loaded_at_utc"] = integration_build_loaded_at_utc
 
         device_data = coordinator.get_device_data(device.model, device.identifiers)
 
@@ -74,6 +85,12 @@ def _async_get_diagnostics(
             "data": debug_data["data"],
             "processors": debug_data["processors"],
         }
+
+        if integration_build is not None:
+            data["integration_build"] = integration_build
+
+        if integration_build_loaded_at_utc is not None:
+            data["integration_build_loaded_at_utc"] = integration_build_loaded_at_utc
 
         processor_data = debug_data["processors"]
         system_data = processor_data[DeviceTypes.SYSTEM]
