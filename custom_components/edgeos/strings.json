@@ -118,24 +118,6 @@
       "smart_queue_rx_traffic": {
         "name": "Smart Queue RX Traffic"
       },
-      "smart_queue_rx_dropped": {
-        "name": "Smart Queue RX Dropped"
-      },
-      "smart_queue_tx_dropped": {
-        "name": "Smart Queue TX Dropped"
-      },
-      "smart_queue_rx_errors": {
-        "name": "Smart Queue RX Errors"
-      },
-      "smart_queue_tx_errors": {
-        "name": "Smart Queue TX Errors"
-      },
-      "smart_queue_rx_packets": {
-        "name": "Smart Queue RX Packets"
-      },
-      "smart_queue_tx_packets": {
-        "name": "Smart Queue TX Packets"
-      },
       "interface_received_dropped": {
         "name": "Received Dropped"
       },

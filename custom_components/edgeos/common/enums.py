@@ -41,12 +41,6 @@ class EntityKeys(StrEnum):
     SMART_QUEUE_DOWNLOAD_LIMIT = "smart_queue_download_limit"
     SMART_QUEUE_RX_RATE = "smart_queue_rx_rate"
     SMART_QUEUE_RX_TRAFFIC = "smart_queue_rx_traffic"
-    SMART_QUEUE_RX_DROPPED = "smart_queue_rx_dropped"
-    SMART_QUEUE_TX_DROPPED = "smart_queue_tx_dropped"
-    SMART_QUEUE_RX_ERRORS = "smart_queue_rx_errors"
-    SMART_QUEUE_TX_ERRORS = "smart_queue_tx_errors"
-    SMART_QUEUE_RX_PACKETS = "smart_queue_rx_packets"
-    SMART_QUEUE_TX_PACKETS = "smart_queue_tx_packets"
 
     INTERFACE_CONNECTED = "interface_connected"
     INTERFACE_RECEIVED_DROPPED = "interface_received_dropped"
