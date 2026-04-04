@@ -76,7 +76,9 @@ def to_bps(value) -> float:
 
     multiplier = multipliers.get(unit, 1)
 
-    return amount * multiplier
+    # EdgeOS smart-queue rates are bit-based (e.g. 12mbit).
+    # HA data-rate sensors in this integration expect bytes/sec values.
+    return (amount * multiplier) / 8.0
 
 
 def get_first_value(data: dict, keys: list[str]):
@@ -99,6 +101,42 @@ def is_queue_enabled(queue_data: dict) -> bool:
         return enabled
 
     return True
+
+
+def is_section_enabled(section_data: dict | None) -> bool:
+    if not isinstance(section_data, dict):
+        return True
+
+    if "disable" in section_data:
+        return False
+
+    enabled = section_data.get("enabled")
+    if isinstance(enabled, str):
+        return enabled.lower() in ["true", "enable", "enabled", "yes", "1"]
+
+    if isinstance(enabled, bool):
+        return enabled
+
+    return True
+
+
+def get_direction_state(queue_data: dict, nested_key: str, keys: list[str]) -> tuple[bool, bool]:
+    # Direction can be configured as a nested object (upload/download)
+    # or as top-level aliases like upload-rate/download-rate.
+    if nested_key in queue_data:
+        section = queue_data.get(nested_key)
+
+        if isinstance(section, dict):
+            return True, is_section_enabled(section)
+
+        if section is not None:
+            return True, True
+
+    for key in keys:
+        if key in queue_data:
+            return True, is_queue_enabled(queue_data)
+
+    return False, False
 
 
 def extract_smart_queue_entries(system_section: dict) -> list[dict]:
@@ -180,7 +218,15 @@ def aggregate_smart_queue_parameters(system_section: dict) -> dict:
     upload_limit = 0.0
     download_limit = 0.0
     enabled_queues = 0
+    upload_enabled_count = 0
+    upload_disabled_count = 0
+    upload_configured_count = 0
+    download_enabled_count = 0
+    download_disabled_count = 0
+    download_configured_count = 0
     advanced_settings: dict[str, dict] = {}
+    direction_states: dict[str, dict[str, bool]] = {}
+    policy_map: dict[str, dict[str, str]] = {}
 
     for queue_item in queue_items:
         queue_data = queue_item.get("data", {})
@@ -193,6 +239,27 @@ def aggregate_smart_queue_parameters(system_section: dict) -> dict:
         if is_queue_enabled(queue_data):
             enabled_queues += 1
 
+        upload_configured, upload_enabled = get_direction_state(
+            queue_data, "upload", SMART_QUEUE_RATE_KEYS
+        )
+        download_configured, download_enabled = get_direction_state(
+            queue_data, "download", SMART_QUEUE_DOWNLOAD_KEYS
+        )
+
+        if upload_configured:
+            upload_configured_count += 1
+            if upload_enabled:
+                upload_enabled_count += 1
+            else:
+                upload_disabled_count += 1
+
+        if download_configured:
+            download_configured_count += 1
+            if download_enabled:
+                download_enabled_count += 1
+            else:
+                download_disabled_count += 1
+
         upload_limit += _get_queue_rate(queue_data, SMART_QUEUE_RATE_KEYS, "upload")
         download_limit += _get_queue_rate(
             queue_data, SMART_QUEUE_DOWNLOAD_KEYS, "download"
@@ -203,6 +270,17 @@ def aggregate_smart_queue_parameters(system_section: dict) -> dict:
             settings_key = f"{interface_name}:{queue_name}"
             advanced_settings[settings_key] = advanced
 
+        direction_states[f"{interface_name}:{queue_name}"] = {
+            "upload_configured": upload_configured,
+            "upload_enabled": upload_enabled,
+            "download_configured": download_configured,
+            "download_enabled": download_enabled,
+        }
+        policy_map[f"{interface_name}:{queue_name}"] = {
+            "policy_name": str(queue_name),
+            "wan_interface": str(interface_name),
+        }
+
     return {
         "smart_queue_total": len(queue_items),
         "smart_queue_enabled": enabled_queues,
@@ -210,6 +288,15 @@ def aggregate_smart_queue_parameters(system_section: dict) -> dict:
         "smart_queue_upload_limit": upload_limit,
         "smart_queue_download_limit": download_limit,
         "smart_queue_advanced_settings": advanced_settings,
+        "smart_queue_direction_states": direction_states,
+        "smart_queue_policy_map": policy_map,
+        "smart_queue_wan_interfaces": sorted(list(unique_interfaces)),
+        "smart_queue_upload_configured": upload_configured_count,
+        "smart_queue_upload_enabled": upload_enabled_count,
+        "smart_queue_upload_disabled": upload_disabled_count,
+        "smart_queue_download_configured": download_configured_count,
+        "smart_queue_download_enabled": download_enabled_count,
+        "smart_queue_download_disabled": download_disabled_count,
     }
 
 

@@ -86,6 +86,26 @@ class IntegrationBaseEntity(CoordinatorEntity):
                 entity_description, device_info
             )
 
+            entity_key = str(entity_description.key)
+            if entity_key.startswith("smart_queue_"):
+                policy_names = []
+                policy_map = coordinator.system.smart_queue_policy_map
+
+                if isinstance(policy_map, dict):
+                    policy_names = sorted(
+                        {
+                            policy_item.get("policy_name")
+                            for policy_item in policy_map.values()
+                            if isinstance(policy_item, dict)
+                            and policy_item.get("policy_name") not in [None, ""]
+                        }
+                    )
+
+                if len(policy_names) == 1:
+                    entity_name = f"{entity_name} [{policy_names[0]}]"
+                elif len(policy_names) > 1:
+                    entity_name = f"{entity_name} [MultiPolicy]"
+
             unique_id_parts = [
                 DOMAIN,
                 entity_description.platform,

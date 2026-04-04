@@ -28,10 +28,10 @@ to_bps = SMART_QUEUE_MODULE.to_bps
 
 
 def test_to_bps_parses_common_units() -> None:
-    assert to_bps("1000") == 1000.0
-    assert to_bps("1kbps") == 1000.0
-    assert to_bps("2 mbit") == 2_000_000.0
-    assert to_bps("0.5gbps") == 500_000_000.0
+    assert to_bps("1000") == 125.0
+    assert to_bps("1kbps") == 125.0
+    assert to_bps("2 mbit") == 250_000.0
+    assert to_bps("0.5gbps") == 62_500_000.0
     assert to_bps("invalid") == 0.0
 
 
@@ -104,14 +104,18 @@ def test_aggregate_smart_queue_parameters_includes_advanced_settings() -> None:
     assert data["smart_queue_total"] == 2
     assert data["smart_queue_enabled"] == 1
     assert data["smart_queue_interfaces"] == 2
-    assert data["smart_queue_upload_limit"] == 15_000_000.0
-    assert data["smart_queue_download_limit"] == 35_000_000.0
+    assert data["smart_queue_upload_limit"] == 1_875_000.0
+    assert data["smart_queue_download_limit"] == 4_375_000.0
     assert data["smart_queue_advanced_settings"]["eth0:upload"]["queue-type"] == "fq_codel"
     assert (
         data["smart_queue_advanced_settings"]["eth0:upload"]["fq-codel"]["target"]
         == "5ms"
     )
     assert data["smart_queue_advanced_settings"]["eth1:download"]["queue-type"] == "cake"
+    assert data["smart_queue_upload_enabled"] == 1
+    assert data["smart_queue_upload_disabled"] == 1
+    assert data["smart_queue_download_enabled"] == 1
+    assert data["smart_queue_download_disabled"] == 1
 
 
 def test_aggregate_smart_queue_parameters_supports_arbitrary_queue_name() -> None:
@@ -136,9 +140,11 @@ def test_aggregate_smart_queue_parameters_supports_arbitrary_queue_name() -> Non
     assert data["smart_queue_total"] == 1
     assert data["smart_queue_enabled"] == 1
     assert data["smart_queue_interfaces"] == 1
-    assert data["smart_queue_upload_limit"] == 12_000_000.0
+    assert data["smart_queue_upload_limit"] == 1_500_000.0
     assert data["smart_queue_download_limit"] == 0.0
     assert data["smart_queue_advanced_settings"]["eth0:Tmo"]["upload"]["flows"] == "1024"
+    assert data["smart_queue_upload_enabled"] == 1
+    assert data["smart_queue_upload_disabled"] == 0
 
 
 def test_aggregate_smart_queue_statistics_aggregates_imq_interfaces_only() -> None:

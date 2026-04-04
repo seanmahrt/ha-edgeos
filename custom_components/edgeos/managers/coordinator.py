@@ -608,6 +608,15 @@ class Coordinator(DataUpdateCoordinator):
             ATTR_ATTRIBUTES: {
                 "advanced_settings": data.smart_queue_advanced_settings,
                 "advanced_settings_count": len(data.smart_queue_advanced_settings),
+                "direction_states": data.smart_queue_direction_states,
+                "policy_map": data.smart_queue_policy_map,
+                "wan_interfaces": data.smart_queue_wan_interfaces,
+                "upload_configured": data.smart_queue_upload_configured,
+                "upload_enabled": data.smart_queue_upload_enabled,
+                "upload_disabled": data.smart_queue_upload_disabled,
+                "download_configured": data.smart_queue_download_configured,
+                "download_enabled": data.smart_queue_download_enabled,
+                "download_disabled": data.smart_queue_download_disabled,
             },
         }
 

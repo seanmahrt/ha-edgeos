@@ -54,6 +54,15 @@ class EdgeOSSystemData:
     smart_queue_rx_packets: float
     smart_queue_tx_packets: float
     smart_queue_advanced_settings: dict
+    smart_queue_direction_states: dict
+    smart_queue_policy_map: dict
+    smart_queue_wan_interfaces: list
+    smart_queue_upload_configured: int
+    smart_queue_upload_enabled: int
+    smart_queue_upload_disabled: int
+    smart_queue_download_configured: int
+    smart_queue_download_enabled: int
+    smart_queue_download_disabled: int
 
     def __init__(self):
         self.hostname = None
@@ -91,6 +100,15 @@ class EdgeOSSystemData:
         self.smart_queue_rx_packets = 0
         self.smart_queue_tx_packets = 0
         self.smart_queue_advanced_settings = {}
+        self.smart_queue_direction_states = {}
+        self.smart_queue_policy_map = {}
+        self.smart_queue_wan_interfaces = []
+        self.smart_queue_upload_configured = 0
+        self.smart_queue_upload_enabled = 0
+        self.smart_queue_upload_disabled = 0
+        self.smart_queue_download_configured = 0
+        self.smart_queue_download_enabled = 0
+        self.smart_queue_download_disabled = 0
 
     @property
     def is_admin(self) -> bool:
@@ -131,6 +149,15 @@ class EdgeOSSystemData:
             "smart_queue_rx_packets": self.smart_queue_rx_packets,
             "smart_queue_tx_packets": self.smart_queue_tx_packets,
             "smart_queue_advanced_settings": self.smart_queue_advanced_settings,
+            "smart_queue_direction_states": self.smart_queue_direction_states,
+            "smart_queue_policy_map": self.smart_queue_policy_map,
+            "smart_queue_wan_interfaces": self.smart_queue_wan_interfaces,
+            "smart_queue_upload_configured": self.smart_queue_upload_configured,
+            "smart_queue_upload_enabled": self.smart_queue_upload_enabled,
+            "smart_queue_upload_disabled": self.smart_queue_upload_disabled,
+            "smart_queue_download_configured": self.smart_queue_download_configured,
+            "smart_queue_download_enabled": self.smart_queue_download_enabled,
+            "smart_queue_download_disabled": self.smart_queue_download_disabled,
         }
 
         return obj

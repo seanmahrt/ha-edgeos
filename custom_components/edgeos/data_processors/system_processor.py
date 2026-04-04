@@ -275,6 +275,23 @@ class SystemProcessor(BaseProcessor):
         system_data.smart_queue_advanced_settings = data[
             "smart_queue_advanced_settings"
         ]
+        system_data.smart_queue_direction_states = data["smart_queue_direction_states"]
+        system_data.smart_queue_policy_map = data["smart_queue_policy_map"]
+        system_data.smart_queue_wan_interfaces = data["smart_queue_wan_interfaces"]
+        system_data.smart_queue_upload_configured = data[
+            "smart_queue_upload_configured"
+        ]
+        system_data.smart_queue_upload_enabled = data["smart_queue_upload_enabled"]
+        system_data.smart_queue_upload_disabled = data["smart_queue_upload_disabled"]
+        system_data.smart_queue_download_configured = data[
+            "smart_queue_download_configured"
+        ]
+        system_data.smart_queue_download_enabled = data[
+            "smart_queue_download_enabled"
+        ]
+        system_data.smart_queue_download_disabled = data[
+            "smart_queue_download_disabled"
+        ]
 
     def _update_smart_queue_statistics(self, system_data: EdgeOSSystemData):
         interfaces_data = self._ws_data.get(WS_INTERFACES_KEY, {})
