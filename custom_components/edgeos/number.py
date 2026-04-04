@@ -62,6 +62,9 @@ class IntegrationNumberEntity(IntegrationBaseEntity, NumberEntity, ABC):
         self._attr_native_min_value = entity_description.native_min_value
         self._attr_native_max_value = entity_description.native_max_value
         self._attr_native_step = 1
+        self._attr_native_unit_of_measurement = (
+            entity_description.native_unit_of_measurement
+        )
 
         self._format_digits: int | None = None
         self._unit_convertor = lambda v: v
