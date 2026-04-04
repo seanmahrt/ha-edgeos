@@ -370,19 +370,10 @@ class Coordinator(DataUpdateCoordinator):
             EntityKeys.UPDATE_ENTITIES_INTERVAL: self._get_update_entities_interval_data,
             EntityKeys.UPDATE_API_INTERVAL: self._get_update_api_interval_data,
             EntityKeys.UNIT: self._get_unit_data,
-            EntityKeys.SMART_QUEUE_UPLOAD_MASTER_ENABLED: self._get_smart_queue_upload_master_enabled_data,
-            EntityKeys.SMART_QUEUE_DOWNLOAD_MASTER_ENABLED: self._get_smart_queue_download_master_enabled_data,
-            EntityKeys.SMART_QUEUE_TOTAL: self._get_smart_queue_total_data,
-            EntityKeys.SMART_QUEUE_ENABLED: self._get_smart_queue_enabled_data,
-            EntityKeys.SMART_QUEUE_UPLOAD_ENABLED: self._get_smart_queue_upload_enabled_data,
-            EntityKeys.SMART_QUEUE_DOWNLOAD_ENABLED: self._get_smart_queue_download_enabled_data,
-            EntityKeys.SMART_QUEUE_INTERFACES: self._get_smart_queue_interfaces_data,
             EntityKeys.SMART_QUEUE_UPLOAD_LIMIT: self._get_smart_queue_upload_limit_data,
             EntityKeys.SMART_QUEUE_DOWNLOAD_LIMIT: self._get_smart_queue_download_limit_data,
             EntityKeys.SMART_QUEUE_RX_RATE: self._get_smart_queue_rx_rate_data,
-            EntityKeys.SMART_QUEUE_TX_RATE: self._get_smart_queue_tx_rate_data,
             EntityKeys.SMART_QUEUE_RX_TRAFFIC: self._get_smart_queue_rx_traffic_data,
-            EntityKeys.SMART_QUEUE_TX_TRAFFIC: self._get_smart_queue_tx_traffic_data,
             EntityKeys.SMART_QUEUE_RX_DROPPED: self._get_smart_queue_rx_dropped_data,
             EntityKeys.SMART_QUEUE_TX_DROPPED: self._get_smart_queue_tx_dropped_data,
             EntityKeys.SMART_QUEUE_RX_ERRORS: self._get_smart_queue_rx_errors_data,
@@ -604,109 +595,27 @@ class Coordinator(DataUpdateCoordinator):
 
         return result
 
-    def _get_smart_queue_upload_master_enabled_data(
-        self, _entity_description
-    ) -> dict | None:
-        data = self._system_processor.get()
-
-        configured = data.smart_queue_upload_configured
-        enabled = data.smart_queue_upload_enabled
-        state = configured > 0 and enabled == configured
-
-        result = {
-            ATTR_IS_ON: state,
-            ATTR_ATTRIBUTES: {
-                "configured": configured,
-                "enabled": enabled,
-                "disabled": data.smart_queue_upload_disabled,
-            },
-        }
-
-        return result
-
-    def _get_smart_queue_download_master_enabled_data(
-        self, _entity_description
-    ) -> dict | None:
-        data = self._system_processor.get()
-
-        configured = data.smart_queue_download_configured
-        enabled = data.smart_queue_download_enabled
-        state = configured > 0 and enabled == configured
-
-        result = {
-            ATTR_IS_ON: state,
-            ATTR_ATTRIBUTES: {
-                "configured": configured,
-                "enabled": enabled,
-                "disabled": data.smart_queue_download_disabled,
-            },
-        }
-
-        return result
-
-    def _get_smart_queue_total_data(self, _entity_description) -> dict | None:
-        data = self._system_processor.get()
-        monitored = self._is_smart_queue_monitored()
-
-        result = {
-            ATTR_STATE: data.smart_queue_total,
-            ATTR_ATTRIBUTES: {
-                "advanced_settings": data.smart_queue_advanced_settings,
-                "advanced_settings_count": len(data.smart_queue_advanced_settings),
-                "direction_states": data.smart_queue_direction_states,
-                "policy_map": data.smart_queue_policy_map,
-                "wan_interfaces": data.smart_queue_wan_interfaces,
-                "upload_configured": data.smart_queue_upload_configured,
-                "upload_enabled": data.smart_queue_upload_enabled,
-                "upload_disabled": data.smart_queue_upload_disabled,
-                "download_configured": data.smart_queue_download_configured,
-                "download_enabled": data.smart_queue_download_enabled,
-                "download_disabled": data.smart_queue_download_disabled,
-                "monitored": monitored,
-            },
-        }
-
-        return result
-
-    def _get_smart_queue_enabled_data(self, _entity_description) -> dict | None:
-        data = self._system_processor.get()
-
-        result = {ATTR_STATE: data.smart_queue_enabled}
-
-        return result
-
-    def _get_smart_queue_upload_enabled_data(self, _entity_description) -> dict | None:
-        data = self._system_processor.get()
-
-        result = {ATTR_STATE: data.smart_queue_upload_enabled}
-
-        return result
-
-    def _get_smart_queue_download_enabled_data(self, _entity_description) -> dict | None:
-        data = self._system_processor.get()
-
-        result = {ATTR_STATE: data.smart_queue_download_enabled}
-
-        return result
-
-    def _get_smart_queue_interfaces_data(self, _entity_description) -> dict | None:
-        data = self._system_processor.get()
-
-        result = {ATTR_STATE: data.smart_queue_interfaces}
-
-        return result
-
     def _get_smart_queue_upload_limit_data(self, _entity_description) -> dict | None:
         data = self._system_processor.get()
 
-        result = {ATTR_STATE: data.smart_queue_upload_limit}
+        result = {
+            ATTR_STATE: data.smart_queue_upload_limit,
+            ATTR_ACTIONS: {
+                ACTION_ENTITY_SET_NATIVE_VALUE: self._set_smart_queue_upload_limit,
+            },
+        }
 
         return result
 
     def _get_smart_queue_download_limit_data(self, _entity_description) -> dict | None:
         data = self._system_processor.get()
 
-        result = {ATTR_STATE: data.smart_queue_download_limit}
+        result = {
+            ATTR_STATE: data.smart_queue_download_limit,
+            ATTR_ACTIONS: {
+                ACTION_ENTITY_SET_NATIVE_VALUE: self._set_smart_queue_download_limit,
+            },
+        }
 
         return result
 
@@ -718,25 +627,9 @@ class Coordinator(DataUpdateCoordinator):
 
         return result
 
-    def _get_smart_queue_tx_rate_data(self, _entity_description) -> dict | None:
-        data = self._system_processor.get()
-        state = data.smart_queue_tx_rate if self._is_smart_queue_monitored() else None
-
-        result = {ATTR_STATE: state}
-
-        return result
-
     def _get_smart_queue_rx_traffic_data(self, _entity_description) -> dict | None:
         data = self._system_processor.get()
         state = data.smart_queue_rx_traffic if self._is_smart_queue_monitored() else None
-
-        result = {ATTR_STATE: state}
-
-        return result
-
-    def _get_smart_queue_tx_traffic_data(self, _entity_description) -> dict | None:
-        data = self._system_processor.get()
-        state = data.smart_queue_tx_traffic if self._is_smart_queue_monitored() else None
 
         result = {ATTR_STATE: state}
 
@@ -1094,6 +987,18 @@ class Coordinator(DataUpdateCoordinator):
         await self._config_manager.set_unit(option)
 
         await self._remove_entities_of_device()
+
+    async def _set_smart_queue_upload_limit(self, _entity_description, value: float):
+        _LOGGER.debug("Change smart queue upload limit")
+
+        policy_map = self._system_processor.get().smart_queue_policy_map
+        await self._api.set_smart_queue_rate("upload", float(value), policy_map)
+
+    async def _set_smart_queue_download_limit(self, _entity_description, value: float):
+        _LOGGER.debug("Change smart queue download limit")
+
+        policy_map = self._system_processor.get().smart_queue_policy_map
+        await self._api.set_smart_queue_rate("download", float(value), policy_map)
 
     async def _remove_entities_of_device(
         self, device_type: DeviceTypes | None = None, item_id: str | None = None

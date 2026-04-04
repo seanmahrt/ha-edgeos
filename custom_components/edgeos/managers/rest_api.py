@@ -587,3 +587,67 @@ class RestAPI:
             _LOGGER.error(
                 f"Failed to set state of interface {interface.name} to {is_enabled}"
             )
+
+    @staticmethod
+    def _format_mbit_rate(value_bytes_per_second: float) -> str:
+        value_mbit = max(float(value_bytes_per_second), 0.0) * 8.0 / 1_000_000.0
+
+        if abs(value_mbit - round(value_mbit)) < 0.000001:
+            return str(int(round(value_mbit)))
+
+        return f"{value_mbit:.3f}".rstrip("0").rstrip(".")
+
+    async def set_smart_queue_rate(
+        self,
+        direction: str,
+        value_bytes_per_second: float,
+        policy_map: dict,
+    ):
+        modified = False
+
+        if direction not in ["upload", "download"]:
+            _LOGGER.error(f"Invalid smart queue direction: {direction}")
+            return
+
+        if not isinstance(policy_map, dict) or len(policy_map) == 0:
+            _LOGGER.warning("Cannot set smart queue rate: policy map is empty")
+            return
+
+        rate_value = self._format_mbit_rate(value_bytes_per_second)
+
+        data = {"traffic-control": {"smart-queue": {}}}
+
+        for item in policy_map.values():
+            if not isinstance(item, dict):
+                continue
+
+            policy_name = item.get("policy_name")
+            if policy_name in [None, ""]:
+                continue
+
+            data["traffic-control"]["smart-queue"].setdefault(policy_name, {})
+            data["traffic-control"]["smart-queue"][policy_name].setdefault(
+                direction, {}
+            )
+            data["traffic-control"]["smart-queue"][policy_name][direction][
+                "rate"
+            ] = rate_value
+
+        if len(data["traffic-control"]["smart-queue"]) == 0:
+            _LOGGER.warning("Cannot set smart queue rate: no valid policy names")
+            return
+
+        result_json = await self._async_post(API_URL_DATA, data, action=API_SET)
+
+        if result_json is not None:
+            set_response = result_json.get(API_DATA_SAVE.upper(), {})
+
+            if RESPONSE_SUCCESS_KEY in set_response:
+                success_key = str(
+                    set_response.get(RESPONSE_SUCCESS_KEY, RESPONSE_FAILURE_CODE)
+                ).lower()
+
+                modified = success_key != RESPONSE_FAILURE_CODE
+
+        if not modified:
+            _LOGGER.error(f"Failed to set smart queue {direction} rate to {rate_value}")

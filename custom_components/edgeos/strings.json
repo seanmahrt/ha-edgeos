@@ -54,12 +54,6 @@
       "firmware": {
         "name": "Firmware Upgrade"
       },
-      "smart_queue_upload_master_enabled": {
-        "name": "Smart Queue Upload Master Enabled"
-      },
-      "smart_queue_download_master_enabled": {
-        "name": "Smart Queue Download Master Enabled"
-      },
       "interface_connected": {
         "name": "Connected"
       },
@@ -75,6 +69,12 @@
     "number": {
       "consider_away_interval": {
         "name": "Consider Away Interval"
+      },
+      "smart_queue_upload_limit": {
+        "name": "Smart Queue Upload Limit"
+      },
+      "smart_queue_download_limit": {
+        "name": "Smart Queue Download Limit"
       },
       "update_entities_interval": {
         "name": "Update Entities Interval"
@@ -106,21 +106,6 @@
       "unknown_devices": {
         "name": "Unknown Devices"
       },
-      "smart_queue_total": {
-        "name": "Smart Queue Total"
-      },
-      "smart_queue_enabled": {
-        "name": "Smart Queue Enabled"
-      },
-      "smart_queue_upload_enabled": {
-        "name": "Smart Queue Upload Enabled"
-      },
-      "smart_queue_download_enabled": {
-        "name": "Smart Queue Download Enabled"
-      },
-      "smart_queue_interfaces": {
-        "name": "Smart Queue Interfaces"
-      },
       "smart_queue_upload_limit": {
         "name": "Smart Queue Upload Limit"
       },
@@ -130,14 +115,8 @@
       "smart_queue_rx_rate": {
         "name": "Smart Queue RX Rate"
       },
-      "smart_queue_tx_rate": {
-        "name": "Smart Queue TX Rate"
-      },
       "smart_queue_rx_traffic": {
         "name": "Smart Queue RX Traffic"
-      },
-      "smart_queue_tx_traffic": {
-        "name": "Smart Queue TX Traffic"
       },
       "smart_queue_rx_dropped": {
         "name": "Smart Queue RX Dropped"
