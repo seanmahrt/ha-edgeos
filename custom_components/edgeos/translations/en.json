@@ -121,6 +121,12 @@
       "smart_queue_enabled": {
         "name": "Smart Queue Enabled"
       },
+      "smart_queue_upload_enabled": {
+        "name": "Smart Queue Upload Enabled"
+      },
+      "smart_queue_download_enabled": {
+        "name": "Smart Queue Download Enabled"
+      },
       "smart_queue_interfaces": {
         "name": "Smart Queue Interfaces"
       },

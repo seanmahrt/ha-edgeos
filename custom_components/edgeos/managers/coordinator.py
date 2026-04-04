@@ -372,6 +372,8 @@ class Coordinator(DataUpdateCoordinator):
             EntityKeys.UNIT: self._get_unit_data,
             EntityKeys.SMART_QUEUE_TOTAL: self._get_smart_queue_total_data,
             EntityKeys.SMART_QUEUE_ENABLED: self._get_smart_queue_enabled_data,
+            EntityKeys.SMART_QUEUE_UPLOAD_ENABLED: self._get_smart_queue_upload_enabled_data,
+            EntityKeys.SMART_QUEUE_DOWNLOAD_ENABLED: self._get_smart_queue_download_enabled_data,
             EntityKeys.SMART_QUEUE_INTERFACES: self._get_smart_queue_interfaces_data,
             EntityKeys.SMART_QUEUE_UPLOAD_LIMIT: self._get_smart_queue_upload_limit_data,
             EntityKeys.SMART_QUEUE_DOWNLOAD_LIMIT: self._get_smart_queue_download_limit_data,
@@ -628,6 +630,20 @@ class Coordinator(DataUpdateCoordinator):
         data = self._system_processor.get()
 
         result = {ATTR_STATE: data.smart_queue_enabled}
+
+        return result
+
+    def _get_smart_queue_upload_enabled_data(self, _entity_description) -> dict | None:
+        data = self._system_processor.get()
+
+        result = {ATTR_STATE: data.smart_queue_upload_enabled}
+
+        return result
+
+    def _get_smart_queue_download_enabled_data(self, _entity_description) -> dict | None:
+        data = self._system_processor.get()
+
+        result = {ATTR_STATE: data.smart_queue_download_enabled}
 
         return result
 

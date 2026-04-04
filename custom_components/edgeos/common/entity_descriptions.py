@@ -158,6 +158,20 @@ ENTITY_DESCRIPTIONS: list[IntegrationEntityDescription] = [
         device_type=DeviceTypes.SYSTEM,
     ),
     IntegrationSensorEntityDescription(
+        key=EntityKeys.SMART_QUEUE_UPLOAD_ENABLED,
+        native_unit_of_measurement=UnitOfEdgeOS.QUEUES,
+        state_class=SensorStateClass.MEASUREMENT,
+        icon="mdi:upload-network-outline",
+        device_type=DeviceTypes.SYSTEM,
+    ),
+    IntegrationSensorEntityDescription(
+        key=EntityKeys.SMART_QUEUE_DOWNLOAD_ENABLED,
+        native_unit_of_measurement=UnitOfEdgeOS.QUEUES,
+        state_class=SensorStateClass.MEASUREMENT,
+        icon="mdi:download-network-outline",
+        device_type=DeviceTypes.SYSTEM,
+    ),
+    IntegrationSensorEntityDescription(
         key=EntityKeys.SMART_QUEUE_INTERFACES,
         native_unit_of_measurement=UnitOfEdgeOS.DEVICES,
         state_class=SensorStateClass.MEASUREMENT,
