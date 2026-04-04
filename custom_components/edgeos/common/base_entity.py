@@ -61,6 +61,25 @@ async def async_setup_base_entry(
             async_dispatcher_connect(hass, add_component_signal, _async_handle_device)
         )
 
+    # Backfill entities when a platform subscribes after discovery signals were sent.
+    coordinator = hass.data.get(DOMAIN, {}).get(entry.entry_id)
+    discovered_objects = [] if coordinator is None else coordinator._discovered_objects
+
+    if DeviceTypes.SYSTEM in discovered_objects:
+        _async_handle_device(entry.entry_id, DeviceTypes.SYSTEM)
+
+    for discovered_item in discovered_objects:
+        if not isinstance(discovered_item, str):
+            continue
+
+        if discovered_item.startswith(f"{DeviceTypes.INTERFACE} "):
+            interface_name = discovered_item.split(" ", 1)[1]
+            _async_handle_device(entry.entry_id, DeviceTypes.INTERFACE, interface_name)
+
+        elif discovered_item.startswith(f"{DeviceTypes.DEVICE} "):
+            device_mac = discovered_item.split(" ", 1)[1]
+            _async_handle_device(entry.entry_id, DeviceTypes.DEVICE, device_mac)
+
 
 class IntegrationBaseEntity(CoordinatorEntity):
     _entity_description: IntegrationEntityDescription
