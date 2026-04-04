@@ -58,8 +58,6 @@ from .websockets import WebSockets
 _LOGGER = logging.getLogger(__name__)
 
 SMART_QUEUE_TARGET_POLICY_NAME = "Tmo"
-INTEGRATION_BUILD_MARKER = "tmo-number-fix-2026-04-04b"
-INTEGRATION_BUILD_LOADED_AT_UTC = datetime.utcnow().isoformat(timespec="seconds") + "Z"
 
 
 class Coordinator(DataUpdateCoordinator):
@@ -106,7 +104,6 @@ class Coordinator(DataUpdateCoordinator):
         self._last_heartbeat = 0
 
         self._can_load_components: bool = False
-        self._platform_setup_status: dict[str, str] = {}
 
         self._system_processor = SystemProcessor(config_manager.config_data)
         self._device_processor = DeviceProcessor(config_manager.config_data)
@@ -185,7 +182,6 @@ class Coordinator(DataUpdateCoordinator):
         self._build_data_mapping()
 
         entry = self.config_manager.entry
-        _LOGGER.info("Forwarding EdgeOS platforms: %s", ", ".join(PLATFORMS))
         await self.hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
         _LOGGER.info(f"Start loading {DOMAIN} integration, Entry ID: {entry.entry_id}")
@@ -201,9 +197,6 @@ class Coordinator(DataUpdateCoordinator):
         config_data = self._config_manager.get_debug_data()
 
         data = {
-            "integration_build": INTEGRATION_BUILD_MARKER,
-            "integration_build_loaded_at_utc": INTEGRATION_BUILD_LOADED_AT_UTC,
-            "platform_setup_status": dict(self._platform_setup_status),
             "config": config_data,
             "data": {
                 "api": self._api.data,
@@ -217,9 +210,6 @@ class Coordinator(DataUpdateCoordinator):
         }
 
         return data
-
-    def set_platform_setup_status(self, platform: str, status: str) -> None:
-        self._platform_setup_status[platform] = status
 
     async def _on_api_status_changed(self, entry_id: str, status: ConnectivityStatus):
         if entry_id != self._config_manager.entry_id:

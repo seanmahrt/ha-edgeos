@@ -91,6 +91,14 @@ _Configuration -> Integrations -> {Integration} -> Options_ <br />
 | {Router Name} Unknown devices       | Sensor        | Represents number of devices leased by the DHCP server                    | Attributes holds the leased hostname and IPs  |
 | {Router Name} Firmware Updates      | Binary Sensor | New firmware available indication                                         | Attributes holds the url and new release name |
 | {Router Name} Log incoming messages | Switch        | Sets whether to log WebSocket incoming messages for debugging             |                                               |
+| {Router Name} Tmo Smart Queue Upload Limit   | Number        | Writable upload rate limit for Smart Queue policy `Tmo`                  | Displayed in `Mbit/s`; writes to `upload.rate` |
+| {Router Name} Tmo Smart Queue Download Limit | Number        | Writable download rate limit for Smart Queue policy `Tmo`                | Displayed in `Mbit/s`; writes to `download.rate` |
+
+### Smart Queue Notes
+
+- The Smart Queue number entities are scoped to the `Tmo` policy.
+- Values are shown in Home Assistant as `Mbit/s`.
+- Under the hood EdgeOS rate values are read/written using the policy rate fields (`upload.rate` and `download.rate`).
 
 ### Per device
 

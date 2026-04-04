@@ -350,14 +350,12 @@ def is_valid_entity(
 
 
 def get_platforms() -> list[str]:
-    result = [
-        Platform.BINARY_SENSOR.value,
-        Platform.DEVICE_TRACKER.value,
-        Platform.NUMBER.value,
-        Platform.SELECT.value,
-        Platform.SENSOR.value,
-        Platform.SWITCH.value,
-    ]
+    platforms = {
+        str(entity_description.platform.value): None
+        for entity_description in ENTITY_DESCRIPTIONS
+        if entity_description.platform is not None
+    }
+    result = list(platforms.keys())
 
     return result
 

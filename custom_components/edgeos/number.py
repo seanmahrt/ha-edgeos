@@ -10,7 +10,6 @@ from .common.base_entity import IntegrationBaseEntity, async_setup_base_entry
 from .common.consts import (
     ACTION_ENTITY_SET_NATIVE_VALUE,
     ATTR_ATTRIBUTES,
-    DOMAIN,
     ATTR_UNIT_CONVERTOR,
     ATTR_UNIT_INFORMATION,
     UNIT_MAPPING,
@@ -25,23 +24,13 @@ _LOGGER = logging.getLogger(__name__)
 async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities
 ):
-    _LOGGER.info("Setting up EdgeOS number platform for entry %s", entry.entry_id)
-    coordinator = hass.data[DOMAIN][entry.entry_id]
-    coordinator.set_platform_setup_status("number", "starting")
-
-    try:
-        await async_setup_base_entry(
-            hass,
-            entry,
-            Platform.NUMBER,
-            IntegrationNumberEntity,
-            async_add_entities,
-        )
-        coordinator.set_platform_setup_status("number", "ok")
-    except Exception as ex:
-        coordinator.set_platform_setup_status("number", f"error: {ex}")
-        _LOGGER.exception("EdgeOS number platform setup failed")
-        raise
+    await async_setup_base_entry(
+        hass,
+        entry,
+        Platform.NUMBER,
+        IntegrationNumberEntity,
+        async_add_entities,
+    )
 
 
 class IntegrationNumberEntity(IntegrationBaseEntity, NumberEntity, ABC):
