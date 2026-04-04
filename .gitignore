@@ -61,6 +61,15 @@ target/
 log.txt
 
 venv/
+.venv/
+
+# Local router captures and debug exports
+router_data/
+router_json/
+*.router.json
+edgeos.debug.api.json
+edgeos.debug.ws.json
+.storage/edgeos.debug*.json
 
 local_consts.py
 edgeos.key
