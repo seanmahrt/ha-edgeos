@@ -114,6 +114,33 @@ def test_aggregate_smart_queue_parameters_includes_advanced_settings() -> None:
     assert data["smart_queue_advanced_settings"]["eth1:download"]["queue-type"] == "cake"
 
 
+def test_aggregate_smart_queue_parameters_supports_arbitrary_queue_name() -> None:
+    system_section = {
+        "traffic-control": {
+            "smart-queue": {
+                "Tmo": {
+                    "wan-interface": "eth0",
+                    "upload": {
+                        "rate": "12mbit",
+                        "ecn": "disable",
+                        "flows": "1024",
+                        "target": "50ms",
+                    },
+                }
+            }
+        }
+    }
+
+    data = aggregate_smart_queue_parameters(system_section)
+
+    assert data["smart_queue_total"] == 1
+    assert data["smart_queue_enabled"] == 1
+    assert data["smart_queue_interfaces"] == 1
+    assert data["smart_queue_upload_limit"] == 12_000_000.0
+    assert data["smart_queue_download_limit"] == 0.0
+    assert data["smart_queue_advanced_settings"]["eth0:Tmo"]["upload"]["flows"] == "1024"
+
+
 def test_aggregate_smart_queue_statistics_aggregates_imq_interfaces_only() -> None:
     interfaces_data = {
         "imq0": {

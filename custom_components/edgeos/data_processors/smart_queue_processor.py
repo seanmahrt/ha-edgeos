@@ -33,7 +33,7 @@ SMART_QUEUE_DOWNLOAD_KEYS = [
 SMART_QUEUE_NON_ADVANCED_KEYS = set(
     SMART_QUEUE_RATE_KEYS
     + SMART_QUEUE_DOWNLOAD_KEYS
-    + ["disable", "enabled", "description", "name"]
+    + ["disable", "enabled", "description", "name", "wan-interface"]
 )
 
 
@@ -140,11 +140,37 @@ def extract_smart_queue_entries(system_section: dict) -> list[dict]:
 
 
 def extract_advanced_settings(queue_data: dict) -> dict:
-    return {
+    advanced = {
         key: value
         for key, value in queue_data.items()
         if key not in SMART_QUEUE_NON_ADVANCED_KEYS
     }
+
+    upload_settings = queue_data.get("upload")
+    if isinstance(upload_settings, dict):
+        advanced["upload"] = upload_settings
+
+    download_settings = queue_data.get("download")
+    if isinstance(download_settings, dict):
+        advanced["download"] = download_settings
+
+    return advanced
+
+
+def _get_queue_rate(queue_data: dict, keys: list[str], nested_key: str) -> float:
+    direct_value = get_first_value(queue_data, keys)
+
+    if direct_value is not None and not isinstance(direct_value, dict):
+        return to_bps(direct_value)
+
+    nested_section = queue_data.get(nested_key)
+    if isinstance(nested_section, dict):
+        nested_rate = get_first_value(nested_section, ["rate", *keys])
+
+        if nested_rate is not None and not isinstance(nested_rate, dict):
+            return to_bps(nested_rate)
+
+    return 0.0
 
 
 def aggregate_smart_queue_parameters(system_section: dict) -> dict:
@@ -158,7 +184,7 @@ def aggregate_smart_queue_parameters(system_section: dict) -> dict:
 
     for queue_item in queue_items:
         queue_data = queue_item.get("data", {})
-        interface_name = queue_item.get("interface")
+        interface_name = queue_data.get("wan-interface") or queue_item.get("interface")
         queue_name = queue_item.get("name")
 
         if interface_name is not None:
@@ -167,9 +193,9 @@ def aggregate_smart_queue_parameters(system_section: dict) -> dict:
         if is_queue_enabled(queue_data):
             enabled_queues += 1
 
-        upload_limit += to_bps(get_first_value(queue_data, SMART_QUEUE_RATE_KEYS))
-        download_limit += to_bps(
-            get_first_value(queue_data, SMART_QUEUE_DOWNLOAD_KEYS)
+        upload_limit += _get_queue_rate(queue_data, SMART_QUEUE_RATE_KEYS, "upload")
+        download_limit += _get_queue_rate(
+            queue_data, SMART_QUEUE_DOWNLOAD_KEYS, "download"
         )
 
         advanced = extract_advanced_settings(queue_data)
