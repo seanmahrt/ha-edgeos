@@ -16,7 +16,7 @@ from .common.consts import (
     UNIT_MAPPING,
 )
 from .common.entity_descriptions import IntegrationNumberEntityDescription
-from .common.enums import DeviceTypes
+from .common.enums import DeviceTypes, EntityKeys
 from .managers.coordinator import Coordinator
 
 _LOGGER = logging.getLogger(__name__)
@@ -70,7 +70,18 @@ class IntegrationNumberEntity(IntegrationBaseEntity, NumberEntity, ABC):
         self._unit_convertor = lambda v: v
         self._inverse_unit_convertor = lambda v: v
 
-        if self._attr_native_unit_of_measurement == UnitOfDataRate.BYTES_PER_SECOND:
+        is_smart_queue_limit = entity_description.key in [
+            EntityKeys.SMART_QUEUE_UPLOAD_LIMIT,
+            EntityKeys.SMART_QUEUE_DOWNLOAD_LIMIT,
+        ]
+
+        if is_smart_queue_limit:
+            self._unit_convertor = lambda v: (float(v) * 8) / 1_000_000
+            self._inverse_unit_convertor = lambda v: (float(v) * 1_000_000) / 8
+            self._format_digits = 3
+            self._attr_native_unit_of_measurement = UnitOfDataRate.MEGABITS_PER_SECOND
+
+        elif self._attr_native_unit_of_measurement == UnitOfDataRate.BYTES_PER_SECOND:
             unit = coordinator.config_manager.unit
             unit_settings = UNIT_MAPPING.get(unit, {})
             unit_information = unit_settings.get(
