@@ -602,6 +602,7 @@ class Coordinator(DataUpdateCoordinator):
 
     def _get_smart_queue_total_data(self, _entity_description) -> dict | None:
         data = self._system_processor.get()
+        monitored = self._is_smart_queue_monitored()
 
         result = {
             ATTR_STATE: data.smart_queue_total,
@@ -617,6 +618,7 @@ class Coordinator(DataUpdateCoordinator):
                 "download_configured": data.smart_queue_download_configured,
                 "download_enabled": data.smart_queue_download_enabled,
                 "download_disabled": data.smart_queue_download_disabled,
+                "monitored": monitored,
             },
         }
 
@@ -652,73 +654,95 @@ class Coordinator(DataUpdateCoordinator):
 
     def _get_smart_queue_rx_rate_data(self, _entity_description) -> dict | None:
         data = self._system_processor.get()
+        state = data.smart_queue_rx_rate if self._is_smart_queue_monitored() else None
 
-        result = {ATTR_STATE: data.smart_queue_rx_rate}
+        result = {ATTR_STATE: state}
 
         return result
 
     def _get_smart_queue_tx_rate_data(self, _entity_description) -> dict | None:
         data = self._system_processor.get()
+        state = data.smart_queue_tx_rate if self._is_smart_queue_monitored() else None
 
-        result = {ATTR_STATE: data.smart_queue_tx_rate}
+        result = {ATTR_STATE: state}
 
         return result
 
     def _get_smart_queue_rx_traffic_data(self, _entity_description) -> dict | None:
         data = self._system_processor.get()
+        state = data.smart_queue_rx_traffic if self._is_smart_queue_monitored() else None
 
-        result = {ATTR_STATE: data.smart_queue_rx_traffic}
+        result = {ATTR_STATE: state}
 
         return result
 
     def _get_smart_queue_tx_traffic_data(self, _entity_description) -> dict | None:
         data = self._system_processor.get()
+        state = data.smart_queue_tx_traffic if self._is_smart_queue_monitored() else None
 
-        result = {ATTR_STATE: data.smart_queue_tx_traffic}
+        result = {ATTR_STATE: state}
 
         return result
 
     def _get_smart_queue_rx_dropped_data(self, _entity_description) -> dict | None:
         data = self._system_processor.get()
+        state = data.smart_queue_rx_dropped if self._is_smart_queue_monitored() else None
 
-        result = {ATTR_STATE: data.smart_queue_rx_dropped}
+        result = {ATTR_STATE: state}
 
         return result
 
     def _get_smart_queue_tx_dropped_data(self, _entity_description) -> dict | None:
         data = self._system_processor.get()
+        state = data.smart_queue_tx_dropped if self._is_smart_queue_monitored() else None
 
-        result = {ATTR_STATE: data.smart_queue_tx_dropped}
+        result = {ATTR_STATE: state}
 
         return result
 
     def _get_smart_queue_rx_errors_data(self, _entity_description) -> dict | None:
         data = self._system_processor.get()
+        state = data.smart_queue_rx_errors if self._is_smart_queue_monitored() else None
 
-        result = {ATTR_STATE: data.smart_queue_rx_errors}
+        result = {ATTR_STATE: state}
 
         return result
 
     def _get_smart_queue_tx_errors_data(self, _entity_description) -> dict | None:
         data = self._system_processor.get()
+        state = data.smart_queue_tx_errors if self._is_smart_queue_monitored() else None
 
-        result = {ATTR_STATE: data.smart_queue_tx_errors}
+        result = {ATTR_STATE: state}
 
         return result
 
     def _get_smart_queue_rx_packets_data(self, _entity_description) -> dict | None:
         data = self._system_processor.get()
+        state = data.smart_queue_rx_packets if self._is_smart_queue_monitored() else None
 
-        result = {ATTR_STATE: data.smart_queue_rx_packets}
+        result = {ATTR_STATE: state}
 
         return result
 
     def _get_smart_queue_tx_packets_data(self, _entity_description) -> dict | None:
         data = self._system_processor.get()
+        state = data.smart_queue_tx_packets if self._is_smart_queue_monitored() else None
 
-        result = {ATTR_STATE: data.smart_queue_tx_packets}
+        result = {ATTR_STATE: state}
 
         return result
+
+    def _is_smart_queue_monitored(self) -> bool:
+        system = self._system_processor.get()
+        interfaces = system.smart_queue_wan_interfaces
+
+        if not isinstance(interfaces, list) or len(interfaces) == 0:
+            return False
+
+        return any(
+            self.config_manager.get_monitored_interface(interface_name)
+            for interface_name in interfaces
+        )
 
     def _get_interface_connected_data(
         self, _entity_description, interface_name: str
