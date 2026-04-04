@@ -102,9 +102,21 @@ class IntegrationBaseEntity(CoordinatorEntity):
                     )
 
                 if len(policy_names) == 1:
-                    entity_name = f"{entity_name} [{policy_names[0]}]"
+                    policy_token = policy_names[0]
                 elif len(policy_names) > 1:
-                    entity_name = f"{entity_name} [MultiPolicy]"
+                    policy_token = "MultiPolicy"
+                else:
+                    policy_token = None
+
+                if policy_token is not None:
+                    device_name = str(device_info.get("name", "")).strip()
+                    prefix = f"{device_name} "
+
+                    if device_name != "" and entity_name.startswith(prefix):
+                        entity_tail = entity_name[len(prefix) :]
+                        entity_name = f"{device_name} {policy_token} {entity_tail}"
+                    else:
+                        entity_name = f"{policy_token} {entity_name}"
 
             unique_id_parts = [
                 DOMAIN,
