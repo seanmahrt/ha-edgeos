@@ -87,6 +87,7 @@ STORAGE_DATA_CONSIDER_AWAY_INTERVAL = "consider-away-interval"
 STORAGE_DATA_UPDATE_ENTITIES_INTERVAL = "update-entities-interval"
 STORAGE_DATA_UPDATE_API_INTERVAL = "update-api-interval"
 STORAGE_DATA_UNIT = "unit"
+STORAGE_DATA_SMART_QUEUE_MONITORED = "smart-queue-monitored"
 
 API_DATA_LAST_UPDATE = "lastUpdate"
 
