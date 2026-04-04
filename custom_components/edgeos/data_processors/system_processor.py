@@ -38,12 +38,17 @@ from ..common.consts import (
     SYSTEM_STATS_DATA_MEM,
     SYSTEM_STATS_DATA_UPTIME,
     WS_DISCOVER_KEY,
+    WS_INTERFACES_KEY,
     WS_SYSTEM_STATS_KEY,
 )
-from ..common.enums import DeviceTypes
+from ..common.enums import DeviceTypes, DynamicInterfaceTypes
 from ..models.config_data import ConfigData
 from ..models.edge_os_system_data import EdgeOSSystemData
 from .base_processor import BaseProcessor
+from .smart_queue_processor import (
+    aggregate_smart_queue_parameters,
+    aggregate_smart_queue_statistics,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -135,6 +140,8 @@ class SystemProcessor(BaseProcessor):
             current_user = users.get(self._config_data.username, {})
             system_data.user_level = current_user.get(SYSTEM_DATA_LOGIN_USER_LEVEL)
 
+            self._update_smart_queue_parameters(system_data, system_section)
+
             self._system = system_data
 
             self._update_leased_devices()
@@ -168,6 +175,8 @@ class SystemProcessor(BaseProcessor):
             if uptime != system_data.uptime:
                 system_data.uptime = uptime
                 system_data.last_reset = self._get_last_reset(uptime)
+
+            self._update_smart_queue_statistics(system_data)
 
         except Exception as ex:
             exc_type, exc_obj, tb = sys.exc_info()
@@ -252,3 +261,33 @@ class SystemProcessor(BaseProcessor):
         result = datetime.fromtimestamp(last_reset)
 
         return result
+
+    def _update_smart_queue_parameters(
+        self, system_data: EdgeOSSystemData, system_section: dict
+    ):
+        data = aggregate_smart_queue_parameters(system_section)
+
+        system_data.smart_queue_total = data["smart_queue_total"]
+        system_data.smart_queue_enabled = data["smart_queue_enabled"]
+        system_data.smart_queue_interfaces = data["smart_queue_interfaces"]
+        system_data.smart_queue_upload_limit = data["smart_queue_upload_limit"]
+        system_data.smart_queue_download_limit = data["smart_queue_download_limit"]
+        system_data.smart_queue_advanced_settings = data[
+            "smart_queue_advanced_settings"
+        ]
+
+    def _update_smart_queue_statistics(self, system_data: EdgeOSSystemData):
+        interfaces_data = self._ws_data.get(WS_INTERFACES_KEY, {})
+        queue_prefix = str(DynamicInterfaceTypes.INTERMEDIATE_QUEUEING_DEVICE)
+        totals = aggregate_smart_queue_statistics(interfaces_data, queue_prefix)
+
+        system_data.smart_queue_rx_rate = totals["smart_queue_rx_rate"]
+        system_data.smart_queue_tx_rate = totals["smart_queue_tx_rate"]
+        system_data.smart_queue_rx_traffic = totals["smart_queue_rx_traffic"]
+        system_data.smart_queue_tx_traffic = totals["smart_queue_tx_traffic"]
+        system_data.smart_queue_rx_dropped = totals["smart_queue_rx_dropped"]
+        system_data.smart_queue_tx_dropped = totals["smart_queue_tx_dropped"]
+        system_data.smart_queue_rx_errors = totals["smart_queue_rx_errors"]
+        system_data.smart_queue_tx_errors = totals["smart_queue_tx_errors"]
+        system_data.smart_queue_rx_packets = totals["smart_queue_rx_packets"]
+        system_data.smart_queue_tx_packets = totals["smart_queue_tx_packets"]

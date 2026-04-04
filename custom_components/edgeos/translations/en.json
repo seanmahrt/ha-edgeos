@@ -115,6 +115,51 @@
       "ram_usage": {
         "name": "RAM Usage"
       },
+      "smart_queue_download_limit": {
+        "name": "Smart Queue Download Limit"
+      },
+      "smart_queue_enabled": {
+        "name": "Smart Queue Enabled"
+      },
+      "smart_queue_interfaces": {
+        "name": "Smart Queue Interfaces"
+      },
+      "smart_queue_rx_dropped": {
+        "name": "Smart Queue RX Dropped"
+      },
+      "smart_queue_rx_errors": {
+        "name": "Smart Queue RX Errors"
+      },
+      "smart_queue_rx_packets": {
+        "name": "Smart Queue RX Packets"
+      },
+      "smart_queue_rx_rate": {
+        "name": "Smart Queue RX Rate"
+      },
+      "smart_queue_rx_traffic": {
+        "name": "Smart Queue RX Traffic"
+      },
+      "smart_queue_total": {
+        "name": "Smart Queue Total"
+      },
+      "smart_queue_tx_dropped": {
+        "name": "Smart Queue TX Dropped"
+      },
+      "smart_queue_tx_errors": {
+        "name": "Smart Queue TX Errors"
+      },
+      "smart_queue_tx_packets": {
+        "name": "Smart Queue TX Packets"
+      },
+      "smart_queue_tx_rate": {
+        "name": "Smart Queue TX Rate"
+      },
+      "smart_queue_tx_traffic": {
+        "name": "Smart Queue TX Traffic"
+      },
+      "smart_queue_upload_limit": {
+        "name": "Smart Queue Upload Limit"
+      },
       "unknown_devices": {
         "name": "Unknown Devices"
       }

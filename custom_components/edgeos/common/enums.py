@@ -37,6 +37,21 @@ class EntityKeys(StrEnum):
     UPDATE_ENTITIES_INTERVAL = "update_entities_interval"
     UPDATE_API_INTERVAL = "update_api_interval"
     UNIT = "unit"
+    SMART_QUEUE_TOTAL = "smart_queue_total"
+    SMART_QUEUE_ENABLED = "smart_queue_enabled"
+    SMART_QUEUE_INTERFACES = "smart_queue_interfaces"
+    SMART_QUEUE_UPLOAD_LIMIT = "smart_queue_upload_limit"
+    SMART_QUEUE_DOWNLOAD_LIMIT = "smart_queue_download_limit"
+    SMART_QUEUE_RX_RATE = "smart_queue_rx_rate"
+    SMART_QUEUE_TX_RATE = "smart_queue_tx_rate"
+    SMART_QUEUE_RX_TRAFFIC = "smart_queue_rx_traffic"
+    SMART_QUEUE_TX_TRAFFIC = "smart_queue_tx_traffic"
+    SMART_QUEUE_RX_DROPPED = "smart_queue_rx_dropped"
+    SMART_QUEUE_TX_DROPPED = "smart_queue_tx_dropped"
+    SMART_QUEUE_RX_ERRORS = "smart_queue_rx_errors"
+    SMART_QUEUE_TX_ERRORS = "smart_queue_tx_errors"
+    SMART_QUEUE_RX_PACKETS = "smart_queue_rx_packets"
+    SMART_QUEUE_TX_PACKETS = "smart_queue_tx_packets"
 
     INTERFACE_CONNECTED = "interface_connected"
     INTERFACE_RECEIVED_DROPPED = "interface_received_dropped"
@@ -65,6 +80,7 @@ class UnitOfEdgeOS(StrEnum):
     DROPPED = "Dropped"
     PACKETS = "Packets"
     DEVICES = "Devices"
+    QUEUES = "Queues"
 
 
 class EntityValidation(StrEnum):
