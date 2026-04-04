@@ -3,7 +3,20 @@
 ## Unreleased
 
 - Fork sync: incorporated parent repository [PR #171](https://github.com/elad-bar/ha-edgeos/pull/171)
-- Add Smart Queue parameter and statistics sensors
+- Add Smart Queue support for EdgeOS `traffic-control.smart-queue` policies with dynamic policy-name handling (for example `Tmo`)
+- Add Smart Queue core sensors: upload/download limits and runtime RX metrics (rate, traffic, dropped, errors, packets)
+- Add Smart Queue write support: upload/download limits are now writable from Home Assistant Number entities
+- Preserve Smart Queue rate units on write-back by reusing the units found in router JSON (`bps`, `kbit`, `mbit`, `gbit`), with safe fallback handling
+- Normalize Smart Queue rate conversion path (EdgeOS bit-based values to HA byte-based data-rate presentation)
+- Add Smart Queue policy/interface metadata and advanced settings exposure via attributes for diagnostics and troubleshooting
+- Improve Smart Queue parsing for nested `upload` / `download` sections, `wan-interface`, and mixed key aliases
+- Update Smart Queue naming to improve sorting by prefixing policy name in entity names
+- Simplify Smart Queue entity set by removing aggregate-count and selected TX live entities to reduce noise
+- Add and update Smart Queue documentation:
+  - `docs/sensor-creation-from-json.md`
+  - `docs/smart-queue-arrangement.md`
+  - `docs/README.md` table of contents/index
+- Add parser-focused tests for Smart Queue processing (`tests/test_smart_queue_processor.py`)
 
 ## 2.1.9
 
