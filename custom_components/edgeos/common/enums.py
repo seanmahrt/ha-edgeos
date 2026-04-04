@@ -39,6 +39,8 @@ class EntityKeys(StrEnum):
     UNIT = "unit"
     SMART_QUEUE_TOTAL = "smart_queue_total"
     SMART_QUEUE_ENABLED = "smart_queue_enabled"
+    SMART_QUEUE_UPLOAD_MASTER_ENABLED = "smart_queue_upload_master_enabled"
+    SMART_QUEUE_DOWNLOAD_MASTER_ENABLED = "smart_queue_download_master_enabled"
     SMART_QUEUE_UPLOAD_ENABLED = "smart_queue_upload_enabled"
     SMART_QUEUE_DOWNLOAD_ENABLED = "smart_queue_download_enabled"
     SMART_QUEUE_INTERFACES = "smart_queue_interfaces"

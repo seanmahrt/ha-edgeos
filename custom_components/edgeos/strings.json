@@ -54,6 +54,12 @@
       "firmware": {
         "name": "Firmware Upgrade"
       },
+      "smart_queue_upload_master_enabled": {
+        "name": "Smart Queue Upload Master Enabled"
+      },
+      "smart_queue_download_master_enabled": {
+        "name": "Smart Queue Download Master Enabled"
+      },
       "interface_connected": {
         "name": "Connected"
       },

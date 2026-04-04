@@ -370,6 +370,8 @@ class Coordinator(DataUpdateCoordinator):
             EntityKeys.UPDATE_ENTITIES_INTERVAL: self._get_update_entities_interval_data,
             EntityKeys.UPDATE_API_INTERVAL: self._get_update_api_interval_data,
             EntityKeys.UNIT: self._get_unit_data,
+            EntityKeys.SMART_QUEUE_UPLOAD_MASTER_ENABLED: self._get_smart_queue_upload_master_enabled_data,
+            EntityKeys.SMART_QUEUE_DOWNLOAD_MASTER_ENABLED: self._get_smart_queue_download_master_enabled_data,
             EntityKeys.SMART_QUEUE_TOTAL: self._get_smart_queue_total_data,
             EntityKeys.SMART_QUEUE_ENABLED: self._get_smart_queue_enabled_data,
             EntityKeys.SMART_QUEUE_UPLOAD_ENABLED: self._get_smart_queue_upload_enabled_data,
@@ -597,6 +599,46 @@ class Coordinator(DataUpdateCoordinator):
             ATTR_STATE: self.config_manager.unit,
             ATTR_ACTIONS: {
                 ACTION_ENTITY_SELECT_OPTION: self._set_unit,
+            },
+        }
+
+        return result
+
+    def _get_smart_queue_upload_master_enabled_data(
+        self, _entity_description
+    ) -> dict | None:
+        data = self._system_processor.get()
+
+        configured = data.smart_queue_upload_configured
+        enabled = data.smart_queue_upload_enabled
+        state = configured > 0 and enabled == configured
+
+        result = {
+            ATTR_IS_ON: state,
+            ATTR_ATTRIBUTES: {
+                "configured": configured,
+                "enabled": enabled,
+                "disabled": data.smart_queue_upload_disabled,
+            },
+        }
+
+        return result
+
+    def _get_smart_queue_download_master_enabled_data(
+        self, _entity_description
+    ) -> dict | None:
+        data = self._system_processor.get()
+
+        configured = data.smart_queue_download_configured
+        enabled = data.smart_queue_download_enabled
+        state = configured > 0 and enabled == configured
+
+        result = {
+            ATTR_IS_ON: state,
+            ATTR_ATTRIBUTES: {
+                "configured": configured,
+                "enabled": enabled,
+                "disabled": data.smart_queue_download_disabled,
             },
         }
 

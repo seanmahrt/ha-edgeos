@@ -95,6 +95,16 @@ ENTITY_DESCRIPTIONS: list[IntegrationEntityDescription] = [
         device_class=BinarySensorDeviceClass.UPDATE,
         device_type=DeviceTypes.SYSTEM,
     ),
+    IntegrationBinarySensorEntityDescription(
+        key=EntityKeys.SMART_QUEUE_UPLOAD_MASTER_ENABLED,
+        icon="mdi:upload-network",
+        device_type=DeviceTypes.SYSTEM,
+    ),
+    IntegrationBinarySensorEntityDescription(
+        key=EntityKeys.SMART_QUEUE_DOWNLOAD_MASTER_ENABLED,
+        icon="mdi:download-network",
+        device_type=DeviceTypes.SYSTEM,
+    ),
     IntegrationSensorEntityDescription(
         key=EntityKeys.LAST_RESTART,
         device_class=SensorDeviceClass.TIMESTAMP,
