@@ -106,6 +106,7 @@ class Coordinator(DataUpdateCoordinator):
         self._last_heartbeat = 0
 
         self._can_load_components: bool = False
+        self._platform_setup_status: dict[str, str] = {}
 
         self._system_processor = SystemProcessor(config_manager.config_data)
         self._device_processor = DeviceProcessor(config_manager.config_data)
@@ -202,6 +203,7 @@ class Coordinator(DataUpdateCoordinator):
         data = {
             "integration_build": INTEGRATION_BUILD_MARKER,
             "integration_build_loaded_at_utc": INTEGRATION_BUILD_LOADED_AT_UTC,
+            "platform_setup_status": dict(self._platform_setup_status),
             "config": config_data,
             "data": {
                 "api": self._api.data,
@@ -215,6 +217,9 @@ class Coordinator(DataUpdateCoordinator):
         }
 
         return data
+
+    def set_platform_setup_status(self, platform: str, status: str) -> None:
+        self._platform_setup_status[platform] = status
 
     async def _on_api_status_changed(self, entry_id: str, status: ConnectivityStatus):
         if entry_id != self._config_manager.entry_id:
