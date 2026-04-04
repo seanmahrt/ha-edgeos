@@ -58,6 +58,7 @@ from .websockets import WebSockets
 _LOGGER = logging.getLogger(__name__)
 
 SMART_QUEUE_TARGET_POLICY_NAME = "Tmo"
+INTEGRATION_BUILD_MARKER = "tmo-number-fix-2026-04-04b"
 
 
 class Coordinator(DataUpdateCoordinator):
@@ -198,6 +199,7 @@ class Coordinator(DataUpdateCoordinator):
         config_data = self._config_manager.get_debug_data()
 
         data = {
+            "integration_build": INTEGRATION_BUILD_MARKER,
             "config": config_data,
             "data": {
                 "api": self._api.data,
