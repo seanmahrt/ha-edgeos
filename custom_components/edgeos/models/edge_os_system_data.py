@@ -53,6 +53,7 @@ class EdgeOSSystemData:
     smart_queue_tx_errors: float
     smart_queue_rx_packets: float
     smart_queue_tx_packets: float
+    smart_queue_advanced_settings: dict
 
     def __init__(self):
         self.hostname = None
@@ -89,6 +90,7 @@ class EdgeOSSystemData:
         self.smart_queue_tx_errors = 0
         self.smart_queue_rx_packets = 0
         self.smart_queue_tx_packets = 0
+        self.smart_queue_advanced_settings = {}
 
     @property
     def is_admin(self) -> bool:
@@ -128,6 +130,7 @@ class EdgeOSSystemData:
             "smart_queue_tx_errors": self.smart_queue_tx_errors,
             "smart_queue_rx_packets": self.smart_queue_rx_packets,
             "smart_queue_tx_packets": self.smart_queue_tx_packets,
+            "smart_queue_advanced_settings": self.smart_queue_advanced_settings,
         }
 
         return obj

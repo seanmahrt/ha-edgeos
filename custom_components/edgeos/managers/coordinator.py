@@ -603,7 +603,13 @@ class Coordinator(DataUpdateCoordinator):
     def _get_smart_queue_total_data(self, _entity_description) -> dict | None:
         data = self._system_processor.get()
 
-        result = {ATTR_STATE: data.smart_queue_total}
+        result = {
+            ATTR_STATE: data.smart_queue_total,
+            ATTR_ATTRIBUTES: {
+                "advanced_settings": data.smart_queue_advanced_settings,
+                "advanced_settings_count": len(data.smart_queue_advanced_settings),
+            },
+        }
 
         return result
 

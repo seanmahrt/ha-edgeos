@@ -1,49 +1,51 @@
-from homeassistant.const import CONF_HOST, CONF_PASSWORD, CONF_USERNAME
+from importlib.util import module_from_spec, spec_from_file_location
+from pathlib import Path
 
-from custom_components.edgeos.common.consts import (
-    TRAFFIC_DATA_DIRECTION_RECEIVED,
-    TRAFFIC_DATA_DIRECTION_SENT,
-    TRAFFIC_DATA_DROPPED,
-    TRAFFIC_DATA_ERRORS,
-    TRAFFIC_DATA_PACKETS,
-    TRAFFIC_STATS_BPS_KEY,
-    TRAFFIC_STATS_BYTES,
-    WS_INTERFACES_KEY,
+MODULE_PATH = (
+    Path(__file__).resolve().parents[1]
+    / "custom_components"
+    / "edgeos"
+    / "data_processors"
+    / "smart_queue_processor.py"
 )
-from custom_components.edgeos.data_processors.system_processor import SystemProcessor
-from custom_components.edgeos.models.config_data import ConfigData
-from custom_components.edgeos.models.edge_os_system_data import EdgeOSSystemData
 
+SPEC = spec_from_file_location("smart_queue_processor", MODULE_PATH)
+SMART_QUEUE_MODULE = module_from_spec(SPEC)
+SPEC.loader.exec_module(SMART_QUEUE_MODULE)
 
-def _build_processor() -> SystemProcessor:
-    config = ConfigData()
-    config.update(
-        {
-            CONF_HOST: "router.local",
-            CONF_USERNAME: "tester",
-            CONF_PASSWORD: "secret",
-        }
-    )
-    return SystemProcessor(config)
+TRAFFIC_DATA_DIRECTION_RECEIVED = SMART_QUEUE_MODULE.TRAFFIC_DATA_DIRECTION_RECEIVED
+TRAFFIC_DATA_DIRECTION_SENT = SMART_QUEUE_MODULE.TRAFFIC_DATA_DIRECTION_SENT
+TRAFFIC_DATA_DROPPED = SMART_QUEUE_MODULE.TRAFFIC_DATA_DROPPED
+TRAFFIC_DATA_ERRORS = SMART_QUEUE_MODULE.TRAFFIC_DATA_ERRORS
+TRAFFIC_DATA_PACKETS = SMART_QUEUE_MODULE.TRAFFIC_DATA_PACKETS
+TRAFFIC_STATS_BPS_KEY = SMART_QUEUE_MODULE.TRAFFIC_STATS_BPS_KEY
+TRAFFIC_STATS_BYTES = SMART_QUEUE_MODULE.TRAFFIC_STATS_BYTES
+
+aggregate_smart_queue_parameters = SMART_QUEUE_MODULE.aggregate_smart_queue_parameters
+aggregate_smart_queue_statistics = SMART_QUEUE_MODULE.aggregate_smart_queue_statistics
+extract_smart_queue_entries = SMART_QUEUE_MODULE.extract_smart_queue_entries
+to_bps = SMART_QUEUE_MODULE.to_bps
 
 
 def test_to_bps_parses_common_units() -> None:
-    assert SystemProcessor._to_bps("1000") == 1000.0
-    assert SystemProcessor._to_bps("1kbps") == 1000.0
-    assert SystemProcessor._to_bps("2 mbit") == 2_000_000.0
-    assert SystemProcessor._to_bps("0.5gbps") == 500_000_000.0
-    assert SystemProcessor._to_bps("invalid") == 0.0
+    assert to_bps("1000") == 1000.0
+    assert to_bps("1kbps") == 1000.0
+    assert to_bps("2 mbit") == 2_000_000.0
+    assert to_bps("0.5gbps") == 500_000_000.0
+    assert to_bps("invalid") == 0.0
 
 
 def test_extract_smart_queue_entries_finds_nested_items() -> None:
-    processor = _build_processor()
-
     system_section = {
         "interfaces": {
             "ethernet": {
                 "eth0": {
                     "smart-queue": {
-                        "upload": {"upload": "10mbit", "download": "20mbit"}
+                        "upload": {
+                            "upload": "10mbit",
+                            "download": "20mbit",
+                            "queue-type": "fq_codel",
+                        }
                     }
                 },
                 "eth1": {
@@ -59,21 +61,28 @@ def test_extract_smart_queue_entries_finds_nested_items() -> None:
         }
     }
 
-    entries = processor._extract_smart_queue_entries(system_section)
+    entries = extract_smart_queue_entries(system_section)
 
     assert len(entries) == 2
+    assert entries[0]["interface"] == "eth0"
+    assert entries[0]["name"] == "upload"
 
 
-def test_update_smart_queue_parameters_aggregates_counts_and_limits() -> None:
-    processor = _build_processor()
-    system_data = EdgeOSSystemData()
-
+def test_aggregate_smart_queue_parameters_includes_advanced_settings() -> None:
     system_section = {
         "interfaces": {
             "ethernet": {
                 "eth0": {
                     "smart-queue": {
-                        "upload": {"upload": "10mbit", "download": "20mbit"}
+                        "upload": {
+                            "upload": "10mbit",
+                            "download": "20mbit",
+                            "queue-type": "fq_codel",
+                            "fq-codel": {
+                                "target": "5ms",
+                                "interval": "100ms",
+                            },
+                        }
                     }
                 },
                 "eth1": {
@@ -82,6 +91,7 @@ def test_update_smart_queue_parameters_aggregates_counts_and_limits() -> None:
                             "upload-rate": "5mbit",
                             "download-rate": "15mbit",
                             "disable": None,
+                            "queue-type": "cake",
                         }
                     }
                 },
@@ -89,49 +99,50 @@ def test_update_smart_queue_parameters_aggregates_counts_and_limits() -> None:
         }
     }
 
-    processor._update_smart_queue_parameters(system_data, system_section)
+    data = aggregate_smart_queue_parameters(system_section)
 
-    assert system_data.smart_queue_total == 2
-    assert system_data.smart_queue_enabled == 1
-    assert system_data.smart_queue_interfaces == 2
-    assert system_data.smart_queue_upload_limit == 15_000_000.0
-    assert system_data.smart_queue_download_limit == 35_000_000.0
+    assert data["smart_queue_total"] == 2
+    assert data["smart_queue_enabled"] == 1
+    assert data["smart_queue_interfaces"] == 2
+    assert data["smart_queue_upload_limit"] == 15_000_000.0
+    assert data["smart_queue_download_limit"] == 35_000_000.0
+    assert data["smart_queue_advanced_settings"]["eth0:upload"]["queue-type"] == "fq_codel"
+    assert (
+        data["smart_queue_advanced_settings"]["eth0:upload"]["fq-codel"]["target"]
+        == "5ms"
+    )
+    assert data["smart_queue_advanced_settings"]["eth1:download"]["queue-type"] == "cake"
 
 
-def test_update_smart_queue_statistics_aggregates_imq_interfaces_only() -> None:
-    processor = _build_processor()
-    system_data = EdgeOSSystemData()
-
-    processor._ws_data = {
-        WS_INTERFACES_KEY: {
-            "imq0": {
-                f"{TRAFFIC_DATA_DIRECTION_RECEIVED}_{TRAFFIC_STATS_BPS_KEY}": 1000,
-                f"{TRAFFIC_DATA_DIRECTION_SENT}_{TRAFFIC_STATS_BPS_KEY}": 2000,
-                f"{TRAFFIC_DATA_DIRECTION_RECEIVED}_{TRAFFIC_STATS_BYTES}": 10_000,
-                f"{TRAFFIC_DATA_DIRECTION_SENT}_{TRAFFIC_STATS_BYTES}": 20_000,
-                f"{TRAFFIC_DATA_DIRECTION_RECEIVED}_{TRAFFIC_DATA_DROPPED}": 1,
-                f"{TRAFFIC_DATA_DIRECTION_SENT}_{TRAFFIC_DATA_DROPPED}": 2,
-                f"{TRAFFIC_DATA_DIRECTION_RECEIVED}_{TRAFFIC_DATA_ERRORS}": 3,
-                f"{TRAFFIC_DATA_DIRECTION_SENT}_{TRAFFIC_DATA_ERRORS}": 4,
-                f"{TRAFFIC_DATA_DIRECTION_RECEIVED}_{TRAFFIC_DATA_PACKETS}": 5,
-                f"{TRAFFIC_DATA_DIRECTION_SENT}_{TRAFFIC_DATA_PACKETS}": 6,
-            },
-            "eth0": {
-                f"{TRAFFIC_DATA_DIRECTION_RECEIVED}_{TRAFFIC_STATS_BPS_KEY}": 999999,
-                f"{TRAFFIC_DATA_DIRECTION_SENT}_{TRAFFIC_STATS_BPS_KEY}": 999999,
-            },
-        }
+def test_aggregate_smart_queue_statistics_aggregates_imq_interfaces_only() -> None:
+    interfaces_data = {
+        "imq0": {
+            f"{TRAFFIC_DATA_DIRECTION_RECEIVED}_{TRAFFIC_STATS_BPS_KEY}": 1000,
+            f"{TRAFFIC_DATA_DIRECTION_SENT}_{TRAFFIC_STATS_BPS_KEY}": 2000,
+            f"{TRAFFIC_DATA_DIRECTION_RECEIVED}_{TRAFFIC_STATS_BYTES}": 10_000,
+            f"{TRAFFIC_DATA_DIRECTION_SENT}_{TRAFFIC_STATS_BYTES}": 20_000,
+            f"{TRAFFIC_DATA_DIRECTION_RECEIVED}_{TRAFFIC_DATA_DROPPED}": 1,
+            f"{TRAFFIC_DATA_DIRECTION_SENT}_{TRAFFIC_DATA_DROPPED}": 2,
+            f"{TRAFFIC_DATA_DIRECTION_RECEIVED}_{TRAFFIC_DATA_ERRORS}": 3,
+            f"{TRAFFIC_DATA_DIRECTION_SENT}_{TRAFFIC_DATA_ERRORS}": 4,
+            f"{TRAFFIC_DATA_DIRECTION_RECEIVED}_{TRAFFIC_DATA_PACKETS}": 5,
+            f"{TRAFFIC_DATA_DIRECTION_SENT}_{TRAFFIC_DATA_PACKETS}": 6,
+        },
+        "eth0": {
+            f"{TRAFFIC_DATA_DIRECTION_RECEIVED}_{TRAFFIC_STATS_BPS_KEY}": 999999,
+            f"{TRAFFIC_DATA_DIRECTION_SENT}_{TRAFFIC_STATS_BPS_KEY}": 999999,
+        },
     }
 
-    processor._update_smart_queue_statistics(system_data)
+    totals = aggregate_smart_queue_statistics(interfaces_data)
 
-    assert system_data.smart_queue_rx_rate == 1000.0
-    assert system_data.smart_queue_tx_rate == 2000.0
-    assert system_data.smart_queue_rx_traffic == 10_000.0
-    assert system_data.smart_queue_tx_traffic == 20_000.0
-    assert system_data.smart_queue_rx_dropped == 1.0
-    assert system_data.smart_queue_tx_dropped == 2.0
-    assert system_data.smart_queue_rx_errors == 3.0
-    assert system_data.smart_queue_tx_errors == 4.0
-    assert system_data.smart_queue_rx_packets == 5.0
-    assert system_data.smart_queue_tx_packets == 6.0
+    assert totals["smart_queue_rx_rate"] == 1000.0
+    assert totals["smart_queue_tx_rate"] == 2000.0
+    assert totals["smart_queue_rx_traffic"] == 10_000.0
+    assert totals["smart_queue_tx_traffic"] == 20_000.0
+    assert totals["smart_queue_rx_dropped"] == 1.0
+    assert totals["smart_queue_tx_dropped"] == 2.0
+    assert totals["smart_queue_rx_errors"] == 3.0
+    assert totals["smart_queue_tx_errors"] == 4.0
+    assert totals["smart_queue_rx_packets"] == 5.0
+    assert totals["smart_queue_tx_packets"] == 6.0

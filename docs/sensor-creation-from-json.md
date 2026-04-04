@@ -107,6 +107,12 @@ Created Smart Queue sensors:
   - `smart_queue_rx_packets`
   - `smart_queue_tx_packets`
 
+Advanced Smart Queue settings:
+
+- The `smart_queue_total` sensor now exposes attributes derived from each queue's advanced options:
+  - `advanced_settings`: map of `<interface>:<queue_name>` to advanced key/value options found in JSON.
+  - `advanced_settings_count`: total number of queue entries with advanced options.
+
 ### Interface Sensors (monitored interfaces only)
 
 Built primarily from WebSocket `interfaces` stats, with static/interface metadata from REST `get.json`:
