@@ -124,6 +124,7 @@ class IntegrationBaseEntity(CoordinatorEntity):
             if entity_key.startswith("smart_queue_"):
                 policy_names = []
                 policy_map = coordinator.system.smart_queue_policy_map
+                preferred_policy_name = "Tmo"
 
                 if isinstance(policy_map, dict):
                     policy_names = sorted(
@@ -135,7 +136,15 @@ class IntegrationBaseEntity(CoordinatorEntity):
                         }
                     )
 
-                if len(policy_names) == 1:
+                matching_policy_names = [
+                    policy_name
+                    for policy_name in policy_names
+                    if str(policy_name).lower() == preferred_policy_name.lower()
+                ]
+
+                if len(matching_policy_names) == 1:
+                    policy_token = matching_policy_names[0]
+                elif len(policy_names) == 1:
                     policy_token = policy_names[0]
                 elif len(policy_names) > 1:
                     policy_token = "MultiPolicy"

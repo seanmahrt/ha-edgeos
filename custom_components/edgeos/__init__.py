@@ -31,6 +31,8 @@ DEPRECATED_SMART_QUEUE_ENTITY_KEYS = {
     "smart_queue_download_master_enabled",
     "smart_queue_tx_rate",
     "smart_queue_tx_traffic",
+    "smart_queue_rx_rate",
+    "smart_queue_rx_traffic",
     "smart_queue_rx_dropped",
     "smart_queue_tx_dropped",
     "smart_queue_rx_errors",

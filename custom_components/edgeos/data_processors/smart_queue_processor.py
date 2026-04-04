@@ -276,7 +276,7 @@ def aggregate_smart_queue_parameters(system_section: dict) -> dict:
     download_configured_count = 0
     advanced_settings: dict[str, dict] = {}
     direction_states: dict[str, dict[str, bool]] = {}
-    policy_map: dict[str, dict[str, str]] = {}
+    policy_map: dict[str, dict[str, str | float]] = {}
 
     for queue_item in queue_items:
         queue_data = queue_item.get("data", {})
@@ -310,10 +310,13 @@ def aggregate_smart_queue_parameters(system_section: dict) -> dict:
             else:
                 download_disabled_count += 1
 
-        upload_limit += _get_queue_rate(queue_data, SMART_QUEUE_RATE_KEYS, "upload")
-        download_limit += _get_queue_rate(
+        queue_upload_limit = _get_queue_rate(queue_data, SMART_QUEUE_RATE_KEYS, "upload")
+        queue_download_limit = _get_queue_rate(
             queue_data, SMART_QUEUE_DOWNLOAD_KEYS, "download"
         )
+
+        upload_limit += queue_upload_limit
+        download_limit += queue_download_limit
 
         advanced = extract_advanced_settings(queue_data)
         if len(advanced) > 0:
@@ -329,6 +332,8 @@ def aggregate_smart_queue_parameters(system_section: dict) -> dict:
         policy_map[f"{interface_name}:{queue_name}"] = {
             "policy_name": str(queue_name),
             "wan_interface": str(interface_name),
+            "upload_limit": queue_upload_limit,
+            "download_limit": queue_download_limit,
             "upload_unit": _get_queue_rate_unit(
                 queue_data, SMART_QUEUE_RATE_KEYS, "upload"
             )

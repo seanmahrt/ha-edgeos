@@ -39,8 +39,6 @@ class EntityKeys(StrEnum):
     UNIT = "unit"
     SMART_QUEUE_UPLOAD_LIMIT = "smart_queue_upload_limit"
     SMART_QUEUE_DOWNLOAD_LIMIT = "smart_queue_download_limit"
-    SMART_QUEUE_RX_RATE = "smart_queue_rx_rate"
-    SMART_QUEUE_RX_TRAFFIC = "smart_queue_rx_traffic"
 
     INTERFACE_CONNECTED = "interface_connected"
     INTERFACE_RECEIVED_DROPPED = "interface_received_dropped"

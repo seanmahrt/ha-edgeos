@@ -74,21 +74,6 @@
         "name": "Utiliza\u00e7\u00e3o do CPU"
       },
       "device_received_rate": {
-        "name": "Taxa recebeu"
-      },
-      "device_received_traffic": {
-        "name": "Tr\u00e1fego recebeu"
-      },
-      "device_sent_rate": {
-        "name": "Taxa enviada"
-      },
-      "device_sent_traffic": {
-        "name": "Enviou tr\u00e1fego"
-      },
-      "interface_received_dropped": {
-        "name": "Recebido caiu"
-      },
-      "interface_received_errors": {
         "name": "Erros recebidos"
       },
       "interface_received_packets": {
@@ -120,18 +105,6 @@
       },
       "ram_usage": {
         "name": "Uso da RAM"
-      },
-      "smart_queue_download_limit": {
-        "name": "Smart Queue Download Limit"
-      },
-      "smart_queue_rx_rate": {
-        "name": "Smart Queue RX Rate"
-      },
-      "smart_queue_rx_traffic": {
-        "name": "Smart Queue RX Traffic"
-      },
-      "smart_queue_upload_limit": {
-        "name": "Smart Queue Upload Limit"
       },
       "unknown_devices": {
         "name": "Dispositivos desconhecidos"

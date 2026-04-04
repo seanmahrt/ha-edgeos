@@ -57,6 +57,8 @@ from .websockets import WebSockets
 
 _LOGGER = logging.getLogger(__name__)
 
+SMART_QUEUE_TARGET_POLICY_NAME = "Tmo"
+
 
 class Coordinator(DataUpdateCoordinator):
     """My custom coordinator."""
@@ -372,8 +374,6 @@ class Coordinator(DataUpdateCoordinator):
             EntityKeys.UNIT: self._get_unit_data,
             EntityKeys.SMART_QUEUE_UPLOAD_LIMIT: self._get_smart_queue_upload_limit_data,
             EntityKeys.SMART_QUEUE_DOWNLOAD_LIMIT: self._get_smart_queue_download_limit_data,
-            EntityKeys.SMART_QUEUE_RX_RATE: self._get_smart_queue_rx_rate_data,
-            EntityKeys.SMART_QUEUE_RX_TRAFFIC: self._get_smart_queue_rx_traffic_data,
             EntityKeys.INTERFACE_CONNECTED: self._get_interface_connected_data,
             EntityKeys.INTERFACE_RECEIVED_DROPPED: self._get_interface_received_dropped_data,
             EntityKeys.INTERFACE_SENT_DROPPED: self._get_interface_sent_dropped_data,
@@ -591,9 +591,12 @@ class Coordinator(DataUpdateCoordinator):
 
     def _get_smart_queue_upload_limit_data(self, _entity_description) -> dict | None:
         data = self._system_processor.get()
+        state = self._get_smart_queue_limit_from_policy(
+            "upload", data.smart_queue_upload_limit
+        )
 
         result = {
-            ATTR_STATE: data.smart_queue_upload_limit,
+            ATTR_STATE: state,
             ATTR_ACTIONS: {
                 ACTION_ENTITY_SET_NATIVE_VALUE: self._set_smart_queue_upload_limit,
             },
@@ -603,9 +606,12 @@ class Coordinator(DataUpdateCoordinator):
 
     def _get_smart_queue_download_limit_data(self, _entity_description) -> dict | None:
         data = self._system_processor.get()
+        state = self._get_smart_queue_limit_from_policy(
+            "download", data.smart_queue_download_limit
+        )
 
         result = {
-            ATTR_STATE: data.smart_queue_download_limit,
+            ATTR_STATE: state,
             ATTR_ACTIONS: {
                 ACTION_ENTITY_SET_NATIVE_VALUE: self._set_smart_queue_download_limit,
             },
@@ -613,33 +619,52 @@ class Coordinator(DataUpdateCoordinator):
 
         return result
 
-    def _get_smart_queue_rx_rate_data(self, _entity_description) -> dict | None:
-        data = self._system_processor.get()
-        state = data.smart_queue_rx_rate if self._is_smart_queue_monitored() else None
+    def _get_target_smart_queue_policy_item(self) -> dict | None:
+        policy_map = self._system_processor.get().smart_queue_policy_map
 
-        result = {ATTR_STATE: state}
+        if not isinstance(policy_map, dict) or len(policy_map) == 0:
+            return None
 
-        return result
+        for policy_item in policy_map.values():
+            if not isinstance(policy_item, dict):
+                continue
 
-    def _get_smart_queue_rx_traffic_data(self, _entity_description) -> dict | None:
-        data = self._system_processor.get()
-        state = data.smart_queue_rx_traffic if self._is_smart_queue_monitored() else None
+            policy_name = str(policy_item.get("policy_name") or "")
+            if policy_name.lower() == SMART_QUEUE_TARGET_POLICY_NAME.lower():
+                return policy_item
 
-        result = {ATTR_STATE: state}
+        return None
 
-        return result
+    def _get_target_smart_queue_policy_map(self) -> dict:
+        target_item = self._get_target_smart_queue_policy_item()
 
-    def _is_smart_queue_monitored(self) -> bool:
-        system = self._system_processor.get()
-        interfaces = system.smart_queue_wan_interfaces
+        if target_item is None:
+            _LOGGER.warning(
+                "Smart Queue policy '%s' was not found. Falling back to all policies",
+                SMART_QUEUE_TARGET_POLICY_NAME,
+            )
+            return self._system_processor.get().smart_queue_policy_map
 
-        if not isinstance(interfaces, list) or len(interfaces) == 0:
-            return False
+        policy_name = target_item.get("policy_name")
+        wan_interface = target_item.get("wan_interface")
+        policy_key = f"{wan_interface}:{policy_name}"
 
-        return any(
-            self.config_manager.get_monitored_interface(interface_name)
-            for interface_name in interfaces
-        )
+        return {policy_key: target_item}
+
+    def _get_smart_queue_limit_from_policy(
+        self, direction: str, fallback_value: float
+    ) -> float:
+        target_item = self._get_target_smart_queue_policy_item()
+        if target_item is None:
+            return fallback_value
+
+        limit_key = "upload_limit" if direction == "upload" else "download_limit"
+        limit_value = target_item.get(limit_key)
+
+        try:
+            return float(limit_value)
+        except (TypeError, ValueError):
+            return fallback_value
 
     def _get_interface_connected_data(
         self, _entity_description, interface_name: str
@@ -937,13 +962,13 @@ class Coordinator(DataUpdateCoordinator):
     async def _set_smart_queue_upload_limit(self, _entity_description, value: float):
         _LOGGER.debug("Change smart queue upload limit")
 
-        policy_map = self._system_processor.get().smart_queue_policy_map
+        policy_map = self._get_target_smart_queue_policy_map()
         await self._api.set_smart_queue_rate("upload", float(value), policy_map)
 
     async def _set_smart_queue_download_limit(self, _entity_description, value: float):
         _LOGGER.debug("Change smart queue download limit")
 
-        policy_map = self._system_processor.get().smart_queue_policy_map
+        policy_map = self._get_target_smart_queue_policy_map()
         await self._api.set_smart_queue_rate("download", float(value), policy_map)
 
     async def _remove_entities_of_device(

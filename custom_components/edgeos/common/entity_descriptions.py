@@ -167,20 +167,6 @@ ENTITY_DESCRIPTIONS: list[IntegrationEntityDescription] = [
         icon="mdi:download-network-outline",
         device_type=DeviceTypes.SYSTEM,
     ),
-    IntegrationSensorEntityDescription(
-        key=EntityKeys.SMART_QUEUE_RX_RATE,
-        device_class=SensorDeviceClass.DATA_RATE,
-        state_class=SensorStateClass.MEASUREMENT,
-        icon="mdi:download-network-outline",
-        device_type=DeviceTypes.SYSTEM,
-    ),
-    IntegrationSensorEntityDescription(
-        key=EntityKeys.SMART_QUEUE_RX_TRAFFIC,
-        device_class=SensorDeviceClass.DATA_SIZE,
-        state_class=SensorStateClass.TOTAL_INCREASING,
-        icon="mdi:download-network-outline",
-        device_type=DeviceTypes.SYSTEM,
-    ),
     IntegrationBinarySensorEntityDescription(
         key=EntityKeys.INTERFACE_CONNECTED,
         device_class=BinarySensorDeviceClass.CONNECTIVITY,
